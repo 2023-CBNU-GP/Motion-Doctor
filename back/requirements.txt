@@ -1,0 +1,7 @@
+Django
+djangorestframework
+django-cors-headers
+pymysql
+pycryptodome
+PyJWT
+djangorestframework-simplejwt

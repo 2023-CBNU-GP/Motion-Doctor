@@ -1,0 +1,3 @@
+[submodule "back/motionRecog"]
+	path = back/motionRecog
+	url = https://github.com/2023-CBNU-GP/rehabExerciseProgram.git
