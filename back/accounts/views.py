@@ -1,40 +1,32 @@
-# from .models import Userinfo
-# import json
-# from encrypt_utils import AESCipher
-# from .. import my_settings
-# import jwt, datetime
-# from rest_framework.views import APIView
-# from .serializers import UserSerializer
-# from rest_framework.exceptions import AuthenticationFailed
-# from rest_framework.response import Response
-# import smtplib
-# from email.mime.text import MIMEText
-# from random import seed
-# from random import randrange
-# from time import time
-#
-#
-# class RegisterView(APIView):
-#     def post(self, request):
-#         key = my_settings.AES_KEY
-#         aes = AESCipher(key)
-#
-#         user = Userinfo()
-#         body = json.loads(request.body.decode('utf-8'))
-#         user.name = body["name"]
-#         user.id = body["id"]
-#         user.password = aes.encrypt(body["password"])
-#         user.email = body["email"]
-#         user.save()
-#
-#         response = Response()
-#         response.data = {
-#             'message': 'success'
-#         }
-#
-#         return response
-#
-#
+from .models import *
+import json
+from .encrypt_utils import AESCipher
+from back.my_settings import returnKey
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        key = returnKey.aesKey
+        aes = AESCipher(key)
+
+        user = Patient()
+        body = json.loads(request.body.decode('utf-8'))
+        user.name = body["name"]
+        user.id = body["id"]
+        user.password = aes.encrypt(body["password"])
+        user.email = body["email"]
+        user.save()
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
 # class OverlabId(APIView):
 #     def post(self, request):
 #         body = json.loads(request.body.decode('utf-8'))
