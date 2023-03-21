@@ -13,7 +13,7 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 from pathlib import Path
-from .my_settings import returnKey
+from .my_settings import ReturnKey
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -95,8 +95,9 @@ WSGI_APPLICATION = "back.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+returnKey = ReturnKey()
 DATABASES = returnKey.DATABASES
-SECRET_KEY = returnKey.secretKey
+SECRET_KEY = returnKey.secretKey()
 
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
