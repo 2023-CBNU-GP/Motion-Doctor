@@ -17,10 +17,10 @@ services:
           - MYSQL_PASSWORD=doctor
 
     next:
+        restart: always
         build:
           context: ./front
           dockerfile: Dockerfile
-        command: ["npm", "start"]
         ports:
           - 3000:3000
         volumes:
@@ -31,13 +31,10 @@ services:
         build:
           context: ./back
           dockerfile: Dockerfile
-
         ports:
           - 8000:8000
-
         volumes:
-          - ./app:/app
-
+          - ./back:/back
         depends_on:
           - mysql
 
