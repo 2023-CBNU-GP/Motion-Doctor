@@ -1,7 +1,7 @@
 from django.core.files.storage import default_storage
 
 # Create your views here.
-# from django.http import HttpResponse
+from django.http import HttpResponse
 # import sys
 # import re
 # from moviepy.editor import *

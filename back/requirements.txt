@@ -1,7 +1,8 @@
 Django
 djangorestframework
 django-cors-headers
+cryptography
 pymysql
-pycryptodome
+cffi
 PyJWT
 djangorestframework-simplejwt
