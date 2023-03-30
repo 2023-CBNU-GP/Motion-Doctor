@@ -1,11 +1,7 @@
 import Head from 'next/head'
 import Layout from "@md/components/layout";
 import { useState } from "react";
-
-interface userData {
-    userID : string,
-    password : string
-}
+import Link from "next/link";
 
 export default function Home() {
     const [isLogin, setIsLogin] = useState(false);
@@ -19,9 +15,6 @@ export default function Home() {
     const handleInputChange = (e) => {
         setUser({ ...user, [e.target.name]: e.target.value });
     };
-
-
-    const [] = useState();
 
   return (
     <>
@@ -39,7 +32,7 @@ export default function Home() {
             </Layout>
             :
 
-            <div className="bg-gray-50">
+            <div className="bg-gray-50 h-screen">
                 <Layout>
                 <Head>
                     <title>모션 닥터 | 로그인</title>
@@ -47,8 +40,8 @@ export default function Home() {
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
                     <link rel="icon" href="/favicon.ico" />
                 </Head>
-                <main className="flex justify-center pt-32">
-                    <div className="bg-white px-32 w-2/3 drop-shadow-xl rounded-2xl py-20">
+                <main className="flex justify-center pt-20">
+                    <div className="bg-white px-28 w-2/3 drop-shadow-xl rounded-2xl py-20">
                         <div className="text-5xl font-bold text-color-primary-500">Motion</div>
                         <div className="text-5xl font-bold ">Doctor</div>
                         <div className="flex justify-evenly gap-4 pt-10">
@@ -76,7 +69,7 @@ export default function Home() {
                                                     className="w-full p-1 focus:outline-none" type="password" />
                                         </div>
                                         <div className="flex w-full items-baseline justify-between">
-                                            <a className="text-sm text-stone-300 hover:text-color-info-500" href="/signup/patient.tsx">회원가입하기</a>
+                                            <a className="text-sm text-stone-300 hover:text-color-info-500" href="/signup/patient">회원가입하기</a>
                                             <button className="mt-3 py-1 rounded-sm font-bold bg-color-primary-500 text-white w-[42%]" type="submit">로그인 하기</button>
                                         </div>
                                     </form>
@@ -97,7 +90,9 @@ export default function Home() {
                                                     className="w-full p-1 focus:outline-none" type="password" />
                                         </div>
                                         <div className="flex w-full items-baseline justify-between">
-                                            <a className="text-sm text-stone-300 hover:text-color-info-500" href="/signup/doctor.tsx">회원가입하기</a>
+                                            <Link className="text-sm text-stone-300 hover:text-color-info-500" href="/signup/doctor">
+                                                회원가입하기
+                                            </Link>
                                             <button className="mt-3 py-1 rounded-sm font-bold bg-color-primary-500 text-white w-[42%]" type="submit">로그인 하기</button>
                                         </div>
                                     </form>
