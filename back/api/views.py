@@ -1,89 +1,391 @@
-from django.core.files.storage import default_storage
+import smtplib
+from email.mime.text import MIMEText
+from random import seed, randrange
 
-# Create your views here.
-from django.http import HttpResponse
-# import sys
-# import re
-# from moviepy.editor import *
-# import pytube
-# import os.path
-# import glob
-# from pathlib import Path
-# from pydub import AudioSegment
-# import asyncio
+import jwt, datetime
+from time import time
 
-# sys.path.append('/Users/songsuyeong/PF-programs/model/')
-# from GetText import getText
+from django.core.files.storage import FileSystemStorage
+from rest_framework.exceptions import AuthenticationFailed
 
-import time
+import json
+from .encrypt_utils import AESCipher
+from back.my_settings import ReturnKey
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-
-def link(request):
-    #if request.method == 'POST':
-        #video_link = re.search("\'(.+?)\'", str(request.body)).group(1)
-        #print(video_link)
-
-        #yt = pytube.YouTube(video_link)
-
-        # 특정영상 다운로드
-        #yt.streams.filter(only_audio=True).first().download()
-        #print('success')
-
-        #str_result = ''
-        # 굳이 안쓰는 애. 삭제할 예정.
-
-        #path = '/Users/songsuyeong/PF-programs/back/'
-
-        #files = glob.glob("*.mp4")
-        #for x in files:
-        #    if not os.path.isdir(x):
-        #        filename = os.path.splitext(x)
-        #        try:
-        #            os.rename(x, filename[0] + '.mp3')
-        #        except:
-        #            pass
-
-        #file = Path('../../PF-programs/back/' + filename[0] + '.mp3')
-        #while (1):
-        #    if file.exists():
-        #        break
-        #print("파일 생성")
-
-        #str_result = getText(filename[0]+".mp3")
-        #print(str_result)
-
-    #return HttpResponse(str_result)
-    return HttpResponse("link complete")
+from .serializers import *
 
 
-def video(request):
-    #video_file = request.FILES['file']
-    #default_storage.save(video_file.name, video_file)
+class RegisterView(APIView):
+    def post(self, request):
+        returnKey = ReturnKey()
+        key = returnKey.aesKey()
+        aes = AESCipher(key)
 
-    #str_result = ''
-    #path = '/Users/songsuyeong/PF-programs/back/'
-    #dst = "audio.wav"
+        body = json.loads(request.body.decode('utf-8'))
+        user_type = body["type"]
 
-    #files = glob.glob("*.mp4")
-    #for x in files:
-    #    if not os.path.isdir(x):
-    #        filename = os.path.splitext(x)
-    #        try:
-    #            clip = VideoFileClip(filename[0] + '.mp4')
-    #            clip.audio.write_audiofile(filename[0] + ".mp3")
-    #        except:
-    #            pass
+        if user_type == "patient":
+            user = Patient()
+            user.name = body["name"]
+            user.id = body["id"]
+            user.password = aes.encrypt(body["password"])
+            user.email = body["email"]
 
-    #file = Path('../../PF-programs/back/' + filename[0] + '.mp3')
+        else:
+            user = Doctor()
+            user.name = body["name"]
+            user.id = body["id"]
+            user.password = aes.encrypt(body["password"])
+            user.email = body["email"]
+            user.doctornum = body["doctornum"]
+            user.hospitalname = body["hospitalname"]
 
-    #while (1):
-    #    if file.exists():
-    #        break
-    #print("파일 생성")
+        user.save()
 
-    #str_result = getText(filename[0] + '.mp3')
-    #print(str_result)
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
 
-    #return HttpResponse(str_result)
-    return HttpResponse("video complete")
+        return response
 
+
+class OverlabId(APIView):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        input_id = body["id"]
+        user_type = body["type"]
+
+        if user_type == "patient":
+            user = Patient.objects.filter(id=input_id).first()
+        else:
+            user = Doctor.objects.filter(id=input_id).first()
+
+        # 사용자가 이미 존재하는 경우
+        if user is not None:
+            raise AuthenticationFailed("ID already exists!")
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+        return response
+
+
+class LoginView(APIView):
+    def post(self, request):
+        returnKey = ReturnKey()
+        key = returnKey.aesKey()
+        aes = AESCipher(key)
+
+        body = json.loads(request.body.decode('utf-8'))
+        input_id = body["id"]
+        password = body["password"]
+        user_type = body["type"]
+
+        if user_type == "patient":
+            user = Patient.objects.filter(id=input_id).first()
+        elif user_type == "doctor":
+            user = Doctor.objects.filter(id=input_id).first()
+            if user.state != "accept":
+                raise AuthenticationFailed("User not allowed!")
+        # 관리자 (Doctor 테이블의 가장 첫 데이터로 가정)
+        else:
+            user = Doctor.objects.first()
+
+        # 사용자가 없는 경우
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        # 패스워드가 잘못된 경우
+        if password != aes.decrypt(user.password):
+            raise AuthenticationFailed("Incorrect password!")
+
+        # 입력한 비번이랑 같으면 로그인 성공(토큰과 같이 보냄)
+        payload = {
+            'type': user_type,
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
+        }
+
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        response = Response()
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        response.data = {
+            'jwt': token
+        }
+
+        return response
+
+
+class UserView(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        if payload['type'] == 'patient':
+            user = Patient.objects.filter(id=payload['id']).first()
+            serializer = PatientSerializer(user)
+        else:
+            user = Doctor.objects.filter(id=payload['id']).first()
+            serializer = DoctorSerializer(user)
+
+        return Response(serializer.data)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+code_dic = {}
+
+
+class EmailView(APIView):
+    def post(self, request):
+        returnKey = ReturnKey()
+        # 호스트 이메일 환경설정
+        sendEmail = returnKey.EMAIL_HOST_USER
+        body = json.loads(request.body.decode('utf-8'))
+        recvEmail = body['email']
+        password = returnKey.EMAIL_HOST_PASSWORD
+        smtpName = returnKey.EMAIL_HOST
+        smtpPort = returnKey.EMAIL_PORT
+
+        # 인증번호 난수 4자리 생성
+        seed(time())
+        value = randrange(1000, 10000, 1)
+
+        code_dic[recvEmail] = value
+
+        html = """\
+        <html>
+          <head>
+            <style>
+              h1{{
+                background-color: #f9e796;
+                text-align: center;
+                color: black;
+              }}
+              body {{
+                background-color: white;
+              }}
+
+              p {{
+                font-family: verdana;
+                font-size: 20px;
+              }}
+              pre {{
+                text-align: center;
+              }}
+
+              table{{
+                text-align: center;
+                opacity: 0.8;
+              }}
+
+            </style>
+          </head>
+          <body align="center">
+
+          <h1 align="center">
+                  <br>PF PROGRAM<br/><br/>
+          </h1>
+
+          <br>
+          <pre >
+            안녕하세요, PF PROGRAM 관리자입니다.
+            PR FROGAM의 가입을 위해서 고객님의 인증번호를 인증하셔야 합니다.
+            가입을 원하신다면 계정 본인 확인을 위한 아래의 인증 번호를 입력칸에 넣어주시길 바랍니다.<br/>
+          </pre><br/><br/>
+            <table cellpadding="0" cellspacing="0" width="400" height="100">
+              <td bgcolor="#e3e1db">
+                  인증번호 : {code}
+              </td>
+            </table>
+          </body>
+        </html>
+
+        """.format(code=value)
+
+        msg = MIMEText(html, "html")
+
+        msg['Subject'] = "[PF_Program] 이메일 인증"
+        msg['From'] = sendEmail
+        msg['To'] = recvEmail
+
+        s = smtplib.SMTP(smtpName, smtpPort)  # 메일 서버 연결
+        s.starttls()  # TLS 보안 처리
+        s.login(sendEmail, password)  # 로그인
+        s.sendmail(sendEmail, recvEmail, msg.as_string())  # 메일 전송, 문자열로 변환하여 보냅니다.
+        s.close()  # smtp 서버 연결을 종료합니다.
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class EmailCodeView(APIView):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        email = body['email']
+        code = body['code']
+
+        store_code = code_dic.get(email)
+
+        # 이메일이 없는 경우
+        if store_code is None:
+            raise AuthenticationFailed("Email not found!")
+
+        # 잘못된 코드를 입력한 경우
+        if code != store_code:
+            raise AuthenticationFailed("Incorrect certification code")
+
+        del code_dic[email]
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class UserDrop(APIView):
+    def post(self, request):
+        returnKey = ReturnKey()
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        key = returnKey.aesKey()
+        aes = AESCipher(key)
+
+        body = json.loads(request.body.decode('utf-8'))
+        password = body["password"]
+
+        if payload["type"] == "patient":
+            user = Patient.objects.filter(id=payload['id']).first()
+        else:
+            user = Doctor.objects.filter(id=payload['id']).first()
+
+        # 사용자가 없는 경우
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        # 패스워드가 잘못된 경우
+        if password != aes.decrypt(user.password):
+            raise AuthenticationFailed("Incorrect password!")
+
+        user.delete()
+
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class PasswordModify(APIView):
+    def post(self, request):
+        returnKey = ReturnKey()
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        key = returnKey.aesKey()
+        aes = AESCipher(key)
+
+        body = json.loads(request.body.decode('utf-8'))
+        current_password = body["current_password"]
+        new_password = body["new_password"]
+
+        if payload["type"] == "patient":
+            user = Patient.objects.filter(id=payload['id']).first()
+        else:
+            user = Doctor.objects.filter(id=payload['id']).first()
+
+        # 사용자가 없는 경우
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        # 패스워드가 잘못된 경우
+        if current_password != aes.decrypt(user.password):
+            raise AuthenticationFailed("Incorrect password!")
+
+        user.password = aes.encrypt(new_password)
+        user.save()
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class FileUpload(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        doctor = Doctor.objects.filter(id=payload['id']).first()
+
+        form = Correctpic()
+        form.doctorid = doctor
+
+        try:
+            form.picturefilename = request.FILES['video']
+        except:
+            raise FileNotFoundError("파일을 찾을 수 없습니다.")
+
+        fs = FileSystemStorage(location='media/doctor', base_url='media/doctor')
+        fs.save(form.picturefilename.name, form.picturefilename)
+        form.save()
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response

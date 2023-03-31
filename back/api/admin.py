@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import LinkServicesUploads
-from .models import VideoServicesUploads
 
-admin.site.register(LinkServicesUploads)
-admin.site.register(VideoServicesUploads)
+# Register your models here.
+from .models import *
+
+admin.site.register(Patient)
+admin.site.register(Doctor)
+admin.site.register(Doctorcomment)
+admin.site.register(Correctpic)
+admin.site.register(Patientpic)

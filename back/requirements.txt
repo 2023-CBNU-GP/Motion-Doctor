@@ -7,3 +7,4 @@ pymysql
 cffi
 PyJWT
 djangorestframework-simplejwt
+pillow
