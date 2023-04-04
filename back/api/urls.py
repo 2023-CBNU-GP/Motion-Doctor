@@ -11,5 +11,6 @@ urlpatterns = [
   path('code_check', views.EmailCodeView.as_view()),
   path('withdraw', views.UserDrop.as_view()),
   path('modifypw', views.PasswordModify.as_view()),
-  path('file_upload', views.FileUpload.as_view())
+  path('file_upload', views.FileUpload.as_view()),
+  path('isapprove', views.ApproveRejectDoctor.as_view()),
 ]

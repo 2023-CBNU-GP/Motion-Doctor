@@ -41,7 +41,7 @@ class Manage(models.Model):
 
 class Correctpic(models.Model):
     uid = models.AutoField(primary_key=True)
-    picturefilename = models.FileField(db_column='pictureFileName', max_length=255, upload_to='doctor/')
+    picturefilename = models.FileField(db_column='pictureFileName', max_length=255, upload_to='doctor/', blank=True)
     doctorid = models.ForeignKey(Doctor, models.DO_NOTHING, db_column='doctorId')
 
     class Meta:

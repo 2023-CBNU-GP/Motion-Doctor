@@ -5,7 +5,6 @@ from random import seed, randrange
 import jwt, datetime
 from time import time
 
-from django.core.files.storage import FileSystemStorage
 from rest_framework.exceptions import AuthenticationFailed
 
 import json
@@ -89,7 +88,7 @@ class LoginView(APIView):
             user = Patient.objects.filter(id=input_id).first()
         elif user_type == "doctor":
             user = Doctor.objects.filter(id=input_id).first()
-            if user.state != "accept":
+            if user.state != "approval":
                 raise AuthenticationFailed("User not allowed!")
         # 관리자 (Doctor 테이블의 가장 첫 데이터로 가정)
         else:
@@ -376,12 +375,33 @@ class FileUpload(APIView):
 
         try:
             form.picturefilename = request.FILES['video']
+            form.save()
         except:
             raise FileNotFoundError("파일을 찾을 수 없습니다.")
 
-        fs = FileSystemStorage(location='media/doctor', base_url='media/doctor')
-        fs.save(form.picturefilename.name, form.picturefilename)
-        form.save()
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class ApproveRejectDoctor(APIView):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        doctor = Doctor.objects.filter(id=body["id"]).first()
+
+        doctor_type = body["type"]
+
+        if doctor_type == "approval":
+            doctor.state = "approval"
+        elif doctor_type == "rejection":
+            doctor.state = "rejection"
+        else:
+            raise serializers.ValidationError('승인여부 type이 잘못 입력되었습니다.')
+
+        doctor.save()
 
         response = Response()
         response.data = {
