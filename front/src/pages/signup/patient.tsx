@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
 import Layout from "@md/components/layout";
-import useForm from "@md/hooks/useValues";
+import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
 
 export default function Patient () {
@@ -104,7 +104,7 @@ export default function Patient () {
                             </div>
 
 
-                            <button className="bg-color-primary-500 text-white font-bold py-0.5" type="submit" disabled={submitting}>로그인</button>
+                            <button className="bg-color-primary-500 text-white font-bold py-0.5" type="submit" disabled={submitting}>회원가입하기</button>
                         </form>
                     </div>
                 </div>
