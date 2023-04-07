@@ -1,9 +1,31 @@
 import Navigation from "../components/navigation";
 import {useRef, useState} from "react";
-import Webcam from "react-webcam";
 import Head from "next/head";
+import WebCam from "../components/webcam";
+
 
 export default function Test () {
+
+    // posenet.load().then((model) => {
+    //     // 이곳의 model과 아래 predict의 model은 같아야 한다.
+    //     video.onloadeddata = (e) => {
+    //         //비디오가 load된 다음에 predict하도록. (안하면 콘솔에 에러뜸)
+    //         predict();
+    //     };
+    //
+    //     function predict() {
+    //         //frame이 들어올 때마다 estimate를 해야하니 함수화 시킴
+    //         model.estimateSinglePose(video).then((pose) => {
+    //             canvas.width = video.width; //캔버스와 비디오의 크기를 일치시킴
+    //             canvas.height = video.height;
+    //
+    //             drawKeypoints(pose.keypoints, 0.6, context); //정확도
+    //             drawSkeleton(pose.keypoints, 0.6, context);
+    //         });
+    //         requestAnimationFrame(predict); //frame이 들어올 때마다 재귀호출
+    //     }
+    // });
+
     const data = [
         {
             tag : '등배운동',
@@ -52,35 +74,29 @@ export default function Test () {
 
                 </div>
                 <div className="h-full w-[40%] relative">
-                    {
-                        isCapture ?
-                            <div onClick={() => setIsCapture(false)}
-                                 className="opacity-0 hover:opacity-100 absolute left-0 w-full h-full flex justify-center items-center z-40">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     strokeWidth="1.5" stroke="currentColor" className="w-10 h-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round"
-                                          d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>
-                                </svg>
-                            </div>
-                            :
-                            <div onClick={() => setIsCapture(true)}
-                                 className="opacity-0 hover:opacity-100 absolute left-0 w-full h-full flex justify-center items-center z-40">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-                                     stroke="currentColor" className="w-10 h-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round"
-                                          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
-                                </svg>
-                            </div>
-                    }
+                    {/*{*/}
+                    {/*    isCapture ?*/}
+                    {/*        <div onClick={() => setIsCapture(false)}*/}
+                    {/*             className="opacity-0 hover:opacity-100 absolute left-0 w-full h-full flex justify-center items-center z-40">*/}
+                    {/*            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"*/}
+                    {/*                 strokeWidth="1.5" stroke="currentColor" className="w-10 h-10">*/}
+                    {/*                <path strokeLinecap="round" strokeLinejoin="round"*/}
+                    {/*                      d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>*/}
+                    {/*            </svg>*/}
+                    {/*        </div>*/}
+                    {/*        :*/}
+                    {/*        <div onClick={() => setIsCapture(true)}*/}
+                    {/*             className="opacity-0 hover:opacity-100 absolute left-0 w-full h-full flex justify-center items-center z-40">*/}
+                    {/*            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"*/}
+                    {/*                 stroke="currentColor" className="w-10 h-10">*/}
+                    {/*                <path strokeLinecap="round" strokeLinejoin="round"*/}
+                    {/*                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>*/}
+                    {/*            </svg>*/}
+                    {/*        </div>*/}
+                    {/*}*/}
 
                     <div className='w-full h-full z-0'>
-                        <Webcam   style={{
-                            height: "100%",
-                            width: "100%",
-                            objectFit: "cover",
-                        }}
-                                  mirrored={true}
-                        />
+                        <WebCam></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">
