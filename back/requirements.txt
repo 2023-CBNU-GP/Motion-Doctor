@@ -8,3 +8,5 @@ cffi
 PyJWT
 djangorestframework-simplejwt
 pillow
+mysqlclient
+uwsgi

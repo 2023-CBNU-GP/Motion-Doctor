@@ -17,6 +17,21 @@
   <component name="DBNavigator.Project.EditorStateManager">
     <last-used-providers />
   </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.MethodExecutionManager">
+    <method-browser />
+    <execution-history>
+      <group-entries value="true" />
+      <execution-inputs />
+    </execution-history>
+    <argument-values-cache />
+  </component>
+  <component name="DBNavigator.Project.ObjectQuickFilterManager">
+    <last-used-operator value="EQUAL" />
+    <filters />
+  </component>
   <component name="DBNavigator.Project.Settings">
     <connections />
     <browser-settings>

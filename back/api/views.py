@@ -14,9 +14,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .serializers import *
-from pathlib import Path
-import sys
-sys.path.append('/Users/OhJiwoo/Motion-Doctor/back/')
 
 
 class RegisterView(APIView):
@@ -373,16 +370,16 @@ class FileUpload(APIView):
 
         doctor = Doctor.objects.filter(id=payload['id']).first()
 
-        try:
-            file = request.FILES['file']
-        except:
-            raise FileNotFoundError("파일을 찾을 수 없습니다.")
+        # 동영상 저장
+        form = Correctpic()
+        if self.request.FILES:
+            form.picturefilename = request.FILES['file']
+            form.doctorid = doctor
+        form.save()
 
-        fileUpload = Correctpic(
-            picturefilename=file,
-            doctorid=doctor
-        )
-        fileUpload.save()
+        # 동영상 정보 json으로 저장하는 거 여기에 넣어주세용
+
+
 
         response = Response()
         response.data = {
