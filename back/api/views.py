@@ -418,6 +418,43 @@ class FileDelete(APIView):
         return response
 
 
+# 환자 모션 웹캠 저장 및 점수 반환 API
+class PatientEvaluation(APIView):
+    def post(self, request):
+        # 현재 로그인되어있는 doctor 정보 받아오기
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        patient = Patient.objects.filter(id=payload['id']).first()
+
+        form = Patientpic()
+        form.picturefilename = request.FILES.get('file_path')
+
+        # 여기가 모델로 파일을 넘겨서 점수 반환하는 부분입니다.
+        # request.FILES.get('file_path')를 모델로 넘겨서 점수 반환해서 아래 score 변수에 저장해주세욤
+        score = 0
+
+        form.score = score
+        form.correctpicid = Correctpic.objects.filter(exercisename=request.POST.get('name')).first()
+        form.patientid = patient
+        form.save()
+
+        response = Response()
+        response.data = {
+            'message': 'success',
+            'score': score
+        }
+
+        return response
+
+
 class ApproveRejectDoctor(APIView):
     def post(self, request):
         body = json.loads(request.body.decode('utf-8'))

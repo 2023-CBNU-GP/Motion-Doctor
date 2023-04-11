@@ -8,7 +8,7 @@ def doctor_file_path(instance, filename):
 
 
 def patient_file_path(instance, filename):
-    return f"patient/{instance.doctorid.uid}/{instance.exercisename}.mp4"
+    return f"patient/{instance.patientid.uid}/{instance.correctpicid.exercisename}.mp4"
 
 
 class Correctpic(models.Model):

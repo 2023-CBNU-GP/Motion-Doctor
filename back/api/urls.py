@@ -13,5 +13,6 @@ urlpatterns = [
   path('modifypw', views.PasswordModify.as_view()),
   path('file_upload', views.FileUpload.as_view()),
   path('file_delete', views.FileDelete.as_view()),
+  path('evaluation', views.PatientEvaluation.as_view()),
   path('isapprove', views.ApproveRejectDoctor.as_view()),
 ]
