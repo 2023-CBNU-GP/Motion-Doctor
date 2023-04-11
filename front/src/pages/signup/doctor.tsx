@@ -12,7 +12,7 @@ export default function Doctor () {
     const router = useRouter();
 
     const { values, errors, submitting, success, codeCheck, certifyCode, certifyId, certifyEmail, handleChange, handleSubmit } = useForm({
-        initialValues: { id: "", name: "", license: "", hospitalname: "", email: "" , emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
+        initialValues: { login: false, id: "", name: "", license: "", hospitalname: "", email: "" , emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
         onSubmit: (values) => {
             const data : DoctorSign = {
                 id : values.id,

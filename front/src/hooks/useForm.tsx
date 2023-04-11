@@ -63,7 +63,6 @@ function useForm({ initialValues, onSubmit, validate }) {
     const handleSubmit = async (event) => {
         setSubmitting(true);
         event.preventDefault();
-        await new Promise((r) => setTimeout(r, 1000));
         setErrors(validate(values));
     }
 

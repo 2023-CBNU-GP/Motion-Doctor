@@ -21,3 +21,9 @@ export interface PatientSign {
     email: string,
     type: string
 }
+
+export interface UserLogin {
+    id: string,
+    password: string,
+    type: string
+}

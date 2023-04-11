@@ -41,11 +41,15 @@ export default function WebCam() {
     runPosenet();
 
     const drawResult = (pose, video, videoWidth, videoHeight, canvas) => {
-        const ctx = canvas.current.getContext("2d");
-        canvas.current.width = videoWidth;
-        canvas.current.height = videoHeight;
-        drawKeypoints(pose["keypoints"], 0.6, ctx);
-        drawSkeleton(pose["keypoints"], 0.7, ctx);
+        const ctx = document.getElementById('canvas');
+
+        // const ctx = canvas.current.getContext("2d");
+        if (ctx) {
+            canvas.current.width = videoWidth;
+            canvas.current.height = videoHeight;
+            drawKeypoints(pose["keypoints"], 0.6, ctx);
+            drawSkeleton(pose["keypoints"], 0.7, ctx);
+        }
     };
 
 
@@ -123,6 +127,7 @@ export default function WebCam() {
               ref={webcamRef}
           />
           <canvas
+              id={"canvas"}
               ref={canvasRef}
               style={{
                   position: "absolute",
