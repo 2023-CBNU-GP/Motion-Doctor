@@ -24,6 +24,8 @@ export default function Home() {
             };
             axios.post('/api/login', data <UserLogin>).then(response => {
                 if(response.status === 200) {
+                    sessionStorage.setItem("md-access-token", response.data.jwt);
+                    sessionStorage.setItem("md-user", values.id);
                     alert("로그인에 성공하셨습니다.");
                     if(values.type === "patient") {
                         router.push('/test');
