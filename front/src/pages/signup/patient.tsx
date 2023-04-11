@@ -3,12 +3,26 @@ import Navigation from "@md/components/navigation";
 import Layout from "@md/components/layout";
 import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
+import { PatientSign } from "@md/interfaces/user.interface";
+import axios from "@md/hooks/axiosInstance";
 
 export default function Patient () {
     const { values, errors, submitting, success, codeCheck, certifyEmail, certifyId, certifyCode, handleChange, handleSubmit } = useForm({
-        initialValues: { id: "", email: "", password: "", emailValue: "gmail.com"},
+        initialValues: { id: "", name: "", email: "", emailValue: "gmail.com", password: "", type: "patient"},
         onSubmit: (values) => {
-            alert(JSON.stringify(values, null, 2));
+            const data : PatientSign = {
+                id : values.id,
+                name : values.name,
+                password : values.password,
+                email : values.email,
+                type : values.type
+            };
+            axios.post('/api/signup', data <DoctorSign>).then(response => {
+                if(response.status === 200) {
+                    alert("회원가입에 성공하셨습니다.");
+                    router.push('/');
+                }
+            });
         },
         validate,
     });

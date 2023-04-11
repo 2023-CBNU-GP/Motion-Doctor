@@ -14,23 +14,21 @@ export default function Doctor () {
     const { values, errors, submitting, success, codeCheck, certifyCode, certifyId, certifyEmail, handleChange, handleSubmit } = useForm({
         initialValues: { id: "", name: "", license: "", hospitalname: "", email: "" , emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
         onSubmit: (values) => {
-            if (values.type === "doctor") {
-                const data : DoctorSign = {
-                    id : values.id,
-                    name : values.name,
-                    password : values.password,
-                    email : values.email,
-                    doctornum : parseInt(values.doctornum),
-                    hospitalname : values.hospitalname,
-                    type : values.type
-                };
-                axios.post('/api/signup', data <DoctorSign>).then(response => {
-                    if(response.status === 200) {
-                        alert("회원가입에 성공하셨습니다.");
-                        router.push('/');
-                    }
-                });
-            }
+            const data : DoctorSign = {
+                id : values.id,
+                name : values.name,
+                password : values.password,
+                email : values.email + "@" + values.emailValue,
+                doctornum : parseInt(values.license),
+                hospitalname : values.hospitalname,
+                type : values.type
+            };
+            axios.post('/api/signup', data <DoctorSign>).then(response => {
+                if(response.status === 200) {
+                    alert("회원가입에 성공하셨습니다.");
+                    router.push('/');
+                }
+            });
         },
         validate,
     });
