@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react"
 import { Errors } from "@md/hooks/validate";
+import axios from "axios";
+
+export interface DoctorSign {
+    name: string,
+    id: string,
+    password: string,
+    email: string,
+    doctornum: number,
+    hospitalname: string,
+    type: string
+
+};
 
 function useForm({ initialValues, onSubmit, validate }) {
     const [values, setValues] = useState(initialValues);
