@@ -5,7 +5,7 @@ import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
 
 export default function Patient () {
-    const { values, errors, submitting, handleChange, handleSubmit } = useForm({
+    const { values, errors, submitting, success, codeCheck, certifyEmail, certifyId, certifyCode, handleChange, handleSubmit } = useForm({
         initialValues: { id: "", email: "", password: "", emailValue: "gmail.com"},
         onSubmit: (values) => {
             alert(JSON.stringify(values, null, 2));
@@ -48,6 +48,21 @@ export default function Patient () {
 
                             <div className="flex gap-1 flex-col">
                                 <div className="flex gap-2 items-center">
+                                    <label className="w-[120px] font-semibold">이름</label>
+                                    <input
+                                        type="name"
+                                        name="name"
+                                        value={values.name}
+                                        onChange={handleChange}
+                                        placeholder="이름을 입력해주세요"
+                                        className={`${errors.name && "border-color-danger-500"} w-full focus:outline-none border border-gray-300 rounded-sm pl-1 py-0.5`}
+                                    />
+                                </div>
+                                {errors.name && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.name}</div>}
+                            </div>
+
+                            <div className="flex gap-1 flex-col">
+                                <div className="flex gap-2 items-center">
                                     <label className="w-[120px] font-semibold">이메일</label>
                                     <input
                                         type="email"
@@ -71,6 +86,23 @@ export default function Patient () {
 
                                 </div>
                                 {errors.email && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.email}</div>}
+                            </div>
+
+                            <div className=" flex gap-1 flex-col">
+                                <div className="flex gap-2 items-center">
+                                    <label className="w-[120px] font-semibold">이메일 코드</label>
+                                    <input
+                                        type="text"
+                                        name="emailCode"
+                                        value={values.emailCode}
+                                        onChange={handleChange}
+                                        placeholder="이메일 검증 코드를 입력해주세요"
+                                        className={`${errors.emailCode && "border-color-danger-500"} w-[calc(100%-50px)] focus:outline-none border border-gray-300 rounded-sm pl-1 py-0.5`}
+                                    />
+                                    <button onClick={certifyCode} type={"button"} className="bg-stone-500 font-bold text-white min-w-fit py-1 w-[50px]">인증</button>
+                                </div>
+                                {errors.emailCode && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.emailCode}</div>}
+                                {success.emailCode && <div className="text-color-success-500 text-sm pl-[100px]">{success.emailCode}</div>}
                             </div>
 
                             <div className="flex gap-1 flex-col">

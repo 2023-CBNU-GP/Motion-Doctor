@@ -1,24 +1,18 @@
 import Layout from "@md/components/layout";
 import Navigation from "@md/components/navigation";
 import Head from "next/head";
-import useForm, { DoctorSign } from "@md/hooks/useForm";
+import useForm  from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
-import axios from "axios";
+import axios from "@md/hooks/axiosInstance";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
-export interface Success {
-    id: string,
-    email: string,
-}
+import { DoctorSign } from "@md/interfaces/user.interface";
 
 export default function Doctor () {
     const router = useRouter();
-    const [success, setSuccess] = useState({} as Success);
-    const [codeCheck, setCodeCheck] = useState();
 
-    const { values, errors, submitting, handleChange, handleSubmit } = useForm({
-        initialValues: { id: "", name: "", license: "", hospitalname: "", email: "" + '', emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
+    const { values, errors, submitting, success, codeCheck, certifyCode, certifyId, certifyEmail, handleChange, handleSubmit } = useForm({
+        initialValues: { id: "", name: "", license: "", hospitalname: "", email: "" , emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
         onSubmit: (values) => {
             if (values.type === "doctor") {
                 const data : DoctorSign = {
@@ -30,69 +24,24 @@ export default function Doctor () {
                     hospitalname : values.hospitalname,
                     type : values.type
                 };
-                axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/signup', data <DoctorSign>).then(response => {
+                axios.post('/api/signup', data <DoctorSign>).then(response => {
                     if(response.status === 200) {
                         alert("회원가입에 성공하셨습니다.");
                         router.push('/');
                     }
                 });
             }
-            // alert(JSON.stringify(values, null, 2));
         },
         validate,
     });
 
     useEffect(() => {
-        setSuccess({id : ""});
+        success["id"] = "";
     }, [values.id]);
 
     useEffect(() => {
 
     }, [errors]);
-
-    const certifyId = () => {
-        axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/id_check', {
-            id: values.id,
-            type: values.type
-        }).then((response) => {
-            if(response.status === 200) {
-                values["isIdCertified"] = true;
-                errors["id"] = "";
-                setSuccess({id: "사용가능한 아이디입니다"});
-            }
-        }).catch(() => {
-            errors["id"] = "이미 존재하는 아이디입니다";
-        });
-    };
-
-    const certifyEmail = () => {
-        axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/email_check', {
-            email: values.email + "@" +values.emailValue,
-            type: values.type
-        }).then((response) => {
-            if(response.status === 200) {
-                alert("인증코드를 전송하였습니다");
-                values["isEmailCertified"] = true;
-                errors["email"] = "";
-                setCodeCheck(true);
-            }
-        });
-    };
-
-    const certifyCode = () => {
-        axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/code_check', {
-            email: values.email + "@" + values.emailValue,
-            code: parseInt(values.emailCode)
-        }).then((response) => {
-            if(response.status === 200) {
-                setSuccess({emailCode: "이메일 인증이 완료되었습니다"});
-                values["isCodeCertified"] = true;
-                errors["email"] = "";
-            }
-        }).catch((error) => {
-            errors["emailCode"] = "유효하지 않은 코드 입니다.";
-        });
-    }
 
     return (
         <div>

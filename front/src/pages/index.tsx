@@ -2,8 +2,40 @@ import Head from 'next/head'
 import Layout from "@md/components/layout";
 import { useState } from "react";
 import Link from "next/link";
+import useForm from "@md/hooks/useForm";
+import validate from "@md/hooks/validate";
+import axios from "@md/hooks/axiosInstance";
+
+export interface DoctorLogin {
+
+}
 
 export default function Home() {
+    const { values, errors, submitting, handleChange, handleSubmit } = useForm({
+        initialValues: { id: "", name: "", license: "", hospitalname: "", email: "" + '', emailValue: "gmail.com", password: "", checkPassword: "", isIdCertified: false, isEmailCertified: false, isCodeCertified: false, type: "doctor"},
+        onSubmit: (values) => {
+            if (values.type === "doctor") {
+                const data : DoctorSign = {
+                    id : values.id,
+                    name : values.name,
+                    password : values.password,
+                    email : values.email,
+                    doctornum : parseInt(values.doctornum),
+                    hospitalname : values.hospitalname,
+                    type : values.type
+                };
+                axios.post('/api/signup', data <DoctorSign>).then(response => {
+                    if(response.status === 200) {
+                        alert("회원가입에 성공하셨습니다.");
+                        router.push('/');
+                    }
+                });
+            }
+        },
+        validate,
+    });
+
+
     const [isLogin, setIsLogin] = useState(false);
     const [isPatient, setIsPatient] = useState(true);
 
