@@ -1,4 +1,6 @@
+import os
 from django.db import models
+from django.conf import settings
 
 
 def doctor_file_path(instance, filename):
@@ -19,6 +21,10 @@ class Correctpic(models.Model):
     class Meta:
         managed = False
         db_table = 'correctPic'
+
+    def delete(self, *args, **kwargs):
+        super(Correctpic, self).delete(*args, **kwargs)
+        os.remove(os.path.join(settings.MEDIA_ROOT, self.picturefilename.path))
 
 
 # state 테이블을 따로 빼는 것도 괜찮을 듯 함. anomaly 해결
