@@ -5,8 +5,12 @@ import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
 import { PatientSign } from "@md/interfaces/user.interface";
 import axios from "@md/hooks/axiosInstance";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 export default function Patient () {
+    const router = useRouter();
+
     const { values, errors, submitting, success, codeCheck, certifyEmail, certifyId, certifyCode, handleChange, handleSubmit } = useForm({
         initialValues: { id: "", name: "", email: "", emailValue: "gmail.com", password: "", type: "patient"},
         onSubmit: (values) => {
@@ -14,10 +18,10 @@ export default function Patient () {
                 id : values.id,
                 name : values.name,
                 password : values.password,
-                email : values.email,
+                email : values.email+"@"+values.emailValue,
                 type : values.type
             };
-            axios.post('/api/signup', data <DoctorSign>).then(response => {
+            axios.post('/api/signup', data <PatientSign>).then(response => {
                 if(response.status === 200) {
                     alert("회원가입에 성공하셨습니다.");
                     router.push('/');
@@ -26,6 +30,15 @@ export default function Patient () {
         },
         validate,
     });
+
+    useEffect(() => {
+        success["id"] = "";
+    }, [values.id]);
+
+    useEffect(() => {
+
+    }, [errors]);
+
 
     return (
         <div>
@@ -55,9 +68,10 @@ export default function Patient () {
                                         placeholder="아이디를 입력해주세요"
                                         className={`${errors.id && "border-color-danger-500"} w-[calc(100%-50px)] focus:outline-none border border-gray-300 rounded-sm pl-1 py-0.5`}
                                     />
-                                    <button type={"button"} className="bg-stone-500 font-bold text-white min-w-fit py-1 w-[50px]">인증</button>
+                                    <button onClick={certifyId} type={"button"} className="bg-stone-500 font-bold text-white min-w-fit py-1 w-[50px]">인증</button>
                                 </div>
                                 {errors.id && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.id}</div>}
+                                {success.id && <div className="text-color-success-500 text-sm pl-[100px]">{success.id}</div>}
                             </div>
 
                             <div className="flex gap-1 flex-col">
@@ -96,7 +110,7 @@ export default function Patient () {
                                         <option value="kakao.com">kakao.com</option>
                                         <option value="nate.com">nate.com</option>
                                     </select>
-                                    <button type="button" className="bg-stone-500 font-bold text-white min-w-fit py-1 w-[50px]">인증</button>
+                                    <button onClick={certifyEmail} type="button" className="bg-stone-500 font-bold text-white min-w-fit py-1 w-[50px]">인증</button>
 
                                 </div>
                                 {errors.email && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.email}</div>}
@@ -139,14 +153,14 @@ export default function Patient () {
                                     <label className="w-[120px] font-semibold">비밀번호 확인</label>
                                     <input
                                         type="password"
-                                        name="password"
-                                        value={values.password}
+                                        name="checkPassword"
+                                        value={values.checkPassword}
                                         onChange={handleChange}
                                         placeholder="비밀번호를 다시 확인해주세요"
                                         className={`${errors.email && "border-color-danger-500"} w-full focus:outline-none border border-gray-300 rounded-sm pl-1 py-0.5`}
                                     />
                                 </div>
-                                {errors.password && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.password}</div>}
+                                {errors.checkPassword && <div className="text-color-danger-500 text-sm pl-[100px]">{errors.checkPassword}</div>}
                             </div>
 
 
