@@ -23,16 +23,15 @@ class RegisterView(APIView):
         aes = AESCipher(key)
 
         body = json.loads(request.body.decode('utf-8'))
-        user_type = body["type"]
 
-        if user_type == "patient":
+        if body["type"] == "patient":
             user = Patient()
             user.name = body["name"]
             user.id = body["id"]
             user.password = aes.encrypt(body["password"])
             user.email = body["email"]
 
-        else:
+        elif body["type"] == "doctor":
             user = Doctor()
             user.name = body["name"]
             user.id = body["id"]
@@ -40,6 +39,9 @@ class RegisterView(APIView):
             user.email = body["email"]
             user.doctornum = body["doctornum"]
             user.hospitalname = body["hospitalname"]
+
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         user.save()
 
@@ -59,8 +61,10 @@ class OverlabId(APIView):
 
         if user_type == "patient":
             user = Patient.objects.filter(id=input_id).first()
-        else:
+        elif body["type"] == "doctor":
             user = Doctor.objects.filter(id=input_id).first()
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         # 사용자가 이미 존재하는 경우
         if user is not None:
@@ -91,8 +95,10 @@ class LoginView(APIView):
             if user.state != "approval":
                 raise AuthenticationFailed("User not allowed!")
         # 관리자 (Doctor 테이블의 가장 첫 데이터로 가정)
-        else:
+        elif user_type == "admin":
             user = Doctor.objects.first()
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         # 사용자가 없는 경우
         if user is None:
@@ -135,9 +141,11 @@ class UserView(APIView):
         if payload['type'] == 'patient':
             user = Patient.objects.filter(id=payload['id']).first()
             serializer = PatientSerializer(user)
-        else:
+        elif payload['type'] == 'doctor':
             user = Doctor.objects.filter(id=payload['id']).first()
             serializer = DoctorSerializer(user)
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         return Response(serializer.data)
 
@@ -158,11 +166,22 @@ code_dic = {}
 
 class EmailView(APIView):
     def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        recvEmail = body['email']
+
+        if body["type"] == "patient":
+            if Patient.objects.filter(email=recvEmail):
+                raise AuthenticationFailed("이미 가입된 이메일입니다.")
+        elif body["type"] == "doctor":
+            if Doctor.objects.filter(email=recvEmail):
+                raise AuthenticationFailed("이미 가입된 이메일입니다.")
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
+
+
         returnKey = ReturnKey()
         # 호스트 이메일 환경설정
         sendEmail = returnKey.EMAIL_HOST_USER
-        body = json.loads(request.body.decode('utf-8'))
-        recvEmail = body['email']
         password = returnKey.EMAIL_HOST_PASSWORD
         smtpName = returnKey.EMAIL_HOST
         smtpPort = returnKey.EMAIL_PORT
@@ -290,8 +309,10 @@ class UserDrop(APIView):
 
         if payload["type"] == "patient":
             user = Patient.objects.filter(id=payload['id']).first()
-        else:
+        elif payload["type"] == "doctor":
             user = Doctor.objects.filter(id=payload['id']).first()
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         # 사용자가 없는 경우
         if user is None:
@@ -334,8 +355,10 @@ class PasswordModify(APIView):
 
         if payload["type"] == "patient":
             user = Patient.objects.filter(id=payload['id']).first()
-        else:
+        elif payload["type"] == "doctor":
             user = Doctor.objects.filter(id=payload['id']).first()
+        else:
+            raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
         # 사용자가 없는 경우
         if user is None:
