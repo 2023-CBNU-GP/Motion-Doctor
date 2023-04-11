@@ -356,8 +356,10 @@ class PasswordModify(APIView):
         return response
 
 
+# 의사가 파일 업로드하는 API 입니다!
 class FileUpload(APIView):
     def post(self, request):
+        # 현재 로그인되어있는 doctor 정보 받아오기
         token = request.COOKIES.get('jwt')
 
         if not token:
@@ -370,16 +372,43 @@ class FileUpload(APIView):
 
         doctor = Doctor.objects.filter(id=payload['id']).first()
 
-        # 동영상 저장
-        form = Correctpic()
-        if self.request.FILES:
-            form.picturefilename = request.FILES['file']
+        # 동영상 저장하는 부분
+        file_data = request.FILES.getlist('file_path')
+        name_data = request.POST.getlist('name')
+        type_data = request.POST.getlist('tag')
+
+        if int(request.POST.get('num')) != len(file_data):
+            raise serializers.ValidationError("업로드할 파일 개수가 맞지 않습니다.")
+
+        for i, name in enumerate(name_data):
+            if Correctpic.objects.filter(exercisename=name_data[i]).first():
+                raise serializers.ValidationError(str(i + 1) + "번째 데이터의 name이 중복되었습니다.")
+
+        for i in range(int(request.POST.get('num'))):
+            form = Correctpic()
+            form.picturefilename = file_data[i]
+            form.exercisename = name_data[i]
+            form.exercisetype = type_data[i]
             form.doctorid = doctor
-        form.save()
+            form.save()
 
         # 동영상 정보 json으로 저장하는 거 여기에 넣어주세용
 
 
+
+        response = Response()
+        response.data = {
+            'message': 'success'
+        }
+
+        return response
+
+
+class FileDelete(APIView):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        data = Correctpic.objects.filter(exercisename=body['name']).first()
+        data.delete()
 
         response = Response()
         response.data = {

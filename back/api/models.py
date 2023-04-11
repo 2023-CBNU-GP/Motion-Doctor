@@ -1,9 +1,19 @@
 from django.db import models
 
 
+def doctor_file_path(instance, filename):
+    return f"doctor/{instance.doctorid.uid}/{instance.exercisename}.mp4"
+
+
+def patient_file_path(instance, filename):
+    return f"patient/{instance.doctorid.uid}/{instance.exercisename}.mp4"
+
+
 class Correctpic(models.Model):
     uid = models.AutoField(primary_key=True)
-    picturefilename = models.FileField(db_column='pictureFileName', max_length=255, upload_to='doctor/', blank=True)  # Field name made lowercase.
+    picturefilename = models.FileField(db_column='pictureFileName', max_length=255, upload_to=doctor_file_path, blank=False)  # Field name made lowercase.
+    exercisename = models.CharField(db_column='exerciseName', max_length=50, unique=True)  # Field name made lowercase.
+    exercisetype = models.CharField(db_column='exerciseType', max_length=50)  # Field name made lowercase.
     doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId')  # Field name made lowercase.
 
     class Meta:
@@ -62,7 +72,7 @@ class Patient(models.Model):
 
 class Patientpic(models.Model):
     uid = models.AutoField(primary_key=True)
-    picturefilename = models.FileField(upload_to='patient/', db_column='pictureFileName', max_length=255)  # Field name made lowercase.
+    picturefilename = models.FileField(upload_to=patient_file_path, db_column='pictureFileName', max_length=255)  # Field name made lowercase.
     score = models.IntegerField(blank=True, null=True)
     correctpicid = models.ForeignKey(Correctpic, models.DO_NOTHING, db_column='correctPicId')  # Field name made lowercase.
     patientid = models.ForeignKey(Patient, models.DO_NOTHING, db_column='patientId')  # Field name made lowercase.
