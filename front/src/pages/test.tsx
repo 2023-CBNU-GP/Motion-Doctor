@@ -5,10 +5,9 @@ import WebCam from "@md/components/webcam";
 
 
 export default function Test () {
-
     const data = [
         {
-            tag : '등배운동',
+            tag : '어깨운동',
             img : '/video/KakaoTalk_Video_2023-03-31-10-57-34.mp4',
         },
         {
@@ -40,17 +39,20 @@ export default function Test () {
 
             <Navigation></Navigation>
 
-            <div className="flex h-full">
-                <div className="flex flex-col overflow-hidden w-[20%] drop-shadow-sm overflow-y-scroll divide-y divide-stone-200 divide-solid">
-                    {
-                        data.map(item => {
-                            return <div key={item.tag} onClick={() => {setVideoData(item);}}
-                                        className={`${videoData.tag === item.tag && "bg-color-primary-100 font-bold"} py-5 px-3 text-center cursor-pointer `}>
-                                {item.tag}
-                            </div>
-                        })
-                    }
+            <div className="flex h-full relative">
+                <div className="h-full w-[20%] flex flex-col">
+                    <div className="flex h-full flex-col overflow-hidden drop-shadow-sm overflow-y-scroll divide-y divide-stone-200 divide-solid">
+                        {
+                            data.map(item => {
+                                return <div key={item.tag} onClick={() => {setVideoData(item);}}
+                                            className={`${videoData.tag === item.tag && "bg-color-primary-100 font-bold"} py-5 px-3 text-center cursor-pointer `}>
+                                    {item.tag}
+                                </div>
+                            })
+                        }
+                    </div>
 
+                    <a className="fixed w-[20%] inset-x-0 bottom-0 py-5 px-3 text-center cursor-pointer" href={`/patient/upload`}>자세등록하기</a>
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
