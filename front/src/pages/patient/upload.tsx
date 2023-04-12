@@ -15,7 +15,7 @@ export default function Upload () {
     const submitVideo = () => {
         const formData = new FormData();
         formData.append('name', items[0]?.name);
-        formData.append('file_path', items[0]?.filePath);
+        formData.append('file_path', items[0]?.file);
 
         axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/evaluation', formData, {withCredentials: true} ).then((response) => {
             if(response.status === 200){
@@ -29,9 +29,12 @@ export default function Upload () {
             id: nextId.current,
             name: "어깨운동",
             filePath: inputRef.current?.value,
+            file : item.filePath,
         };
         setItems([data]);
         nextId.current += 1;
+        console.log(items);
+
         setItem({name: "", filePath: ""});
         inputRef.current.value = null;
     };
@@ -41,7 +44,7 @@ export default function Upload () {
     }
 
     const handleInputChange = (e) => {
-        if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: e.target.files });
+        if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: e.target.files[0] });
         else setItem({ ...item, [e.target.name]: e.target.value });
     };
 
