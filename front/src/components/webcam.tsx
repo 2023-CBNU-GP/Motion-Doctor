@@ -41,9 +41,7 @@ export default function WebCam() {
     runPosenet();
 
     const drawResult = (pose, video, videoWidth, videoHeight, canvas) => {
-        const ctx = document.getElementById('canvas');
-
-        // const ctx = canvas.current.getContext("2d");
+        const ctx = canvas.current?.getContext("2d");
         if (ctx) {
             canvas.current.width = videoWidth;
             canvas.current.height = videoHeight;

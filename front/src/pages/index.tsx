@@ -30,12 +30,14 @@ export default function Home() {
                         secure : true,
                         sameSite : 'none'
                     });
-                    alert("로그인에 성공하셨습니다.");
+                    sessionStorage.setItem("md-user", values.id);
                     if(values.type === "patient") {
                         router.push('/test');
                     } else {
                         router.push('/doctor/upload');
                     }
+                    alert("로그인에 성공하셨습니다.");
+
                 }
             }).catch((error) => {
                 if(error.response.data.detail === "User not found!") {
