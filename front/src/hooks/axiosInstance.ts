@@ -11,13 +11,12 @@ type headers = {
 };
 
 axiosClient.defaults.headers = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json'
+    withCredentials: true,
 } as headers & HeadersDefaults;
 
 axiosClient.interceptors.request.use(
     config => {
-        const token = localStorage.getItem('md-access-token');
+        const token = sessionStorage.getItem('md-access-token');
         if (token) {
             config.headers!['Authorization'] = token;
         }

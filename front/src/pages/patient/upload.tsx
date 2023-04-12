@@ -3,12 +3,26 @@ import Head from "next/head";
 import Navigation from "@md/components/navigation";
 import Item, { UploadItem } from "@md/components/upload/item";
 import { useEffect, useRef, useState } from "react";
+import axios from "@md/hooks/axiosInstance";
+import FormData from "form-data";
 
 export default function Upload () {
     const [item, setItem] = useState({} as UploadItem);
     const [items, setItems] = useState([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const nextId = useRef(0);
+
+    const submitVideo = () => {
+        const formData = new FormData();
+        formData.append('name', items[0]?.name);
+        formData.append('file_path', items[0]?.filePath);
+
+        axios.post('/api/evaluation', formData).then((response) => {
+            if(response.status === 200){
+                alert("대발~");
+            }
+        });
+    };
 
     const handleSubmit = () => {
         const data : UploadItem = {
@@ -67,7 +81,7 @@ export default function Upload () {
                     </div>
 
                     <div className="flex justify-end p-1">
-                        <button
+                        <button onClick={submitVideo}
                                 className="w-[20%] border border-stone-400 rounded-sm py-1 px-3 hover:bg-stone-400 hover:text-white">제출하기</button>
                     </div>
                 </div>
