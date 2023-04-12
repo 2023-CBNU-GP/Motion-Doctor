@@ -1,30 +1,25 @@
 import axios, { HeadersDefaults } from 'axios';
+import { getCookie } from "@md/hooks/cookies";
 
-const axiosClient = axios.create();
-
-axiosClient.defaults.baseURL = process.env.NEXT_PUBLIC_API_KEY;
-
-type headers = {
-    'Content-Type': string;
-    Accept: string;
-    Authorization: string;
-};
-
-axiosClient.defaults.headers = {
+const axiosClient = axios.create({
     withCredentials: true,
-} as headers & HeadersDefaults;
+    baseURL : process.env.NEXT_PUBLIC_API_KEY
+});
 
-axiosClient.interceptors.request.use(
-    config => {
-        const token = sessionStorage.getItem('md-access-token');
-        if (token) {
-            config.headers!['Authorization'] = token;
-        }
-        return config;
-    },
-    error => {
-        return Promise.reject(error);
-    }
-);
+// axiosClient.interceptors.request.use(
+//     config => {
+//         const token = getCookie('jwt');
+//         if (token) {
+//             config.headers = {
+//                 "set-cookie": `${token}`,
+//                 Accept: "application/json",
+//             };
+//         }
+//         return config;
+//     },
+//     error => {
+//         return Promise.reject(error);
+//     }
+// );
 
 export default axiosClient;

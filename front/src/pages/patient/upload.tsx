@@ -3,8 +3,8 @@ import Head from "next/head";
 import Navigation from "@md/components/navigation";
 import Item, { UploadItem } from "@md/components/upload/item";
 import { useEffect, useRef, useState } from "react";
-import axios from "@md/hooks/axiosInstance";
 import FormData from "form-data";
+import axios from "axios";
 
 export default function Upload () {
     const [item, setItem] = useState({} as UploadItem);
@@ -17,9 +17,9 @@ export default function Upload () {
         formData.append('name', items[0]?.name);
         formData.append('file_path', items[0]?.filePath);
 
-        axios.post('/api/evaluation', formData).then((response) => {
+        axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/evaluation', formData, {withCredentials: true} ).then((response) => {
             if(response.status === 200){
-                alert("대발~");
+                alert("자세등록을 완료하였습니다");
             }
         });
     };
@@ -41,7 +41,7 @@ export default function Upload () {
     }
 
     const handleInputChange = (e) => {
-        if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: inputRef.current?.value });
+        if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: e.target.files });
         else setItem({ ...item, [e.target.name]: e.target.value });
     };
 

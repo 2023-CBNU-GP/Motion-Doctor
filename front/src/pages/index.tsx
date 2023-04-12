@@ -3,9 +3,10 @@ import Layout from "@md/components/layout";
 import { useEffect, useState } from "react";
 import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
-import axios from "@md/hooks/axiosInstance";
 import { UserLogin } from "@md/interfaces/user.interface";
 import { useRouter } from "next/router";
+import axios from "axios";
+import { setCookie } from "@md/hooks/cookies";
 
 export default function Home() {
     const router = useRouter();
@@ -22,10 +23,13 @@ export default function Home() {
                 password : values.password,
                 type : values.type
             };
-            axios.post('/api/login', data <UserLogin>).then(response => {
+            axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/login', data <UserLogin>).then(response => {
                 if(response.status === 200) {
-                    sessionStorage.setItem("md-access-token", response.data.jwt);
-                    sessionStorage.setItem("md-user", values.id);
+                    setCookie('jwt', response.data.jwt, {
+                        path : '/',
+                        secure : true,
+                        sameSite : 'none'
+                    });
                     alert("로그인에 성공하셨습니다.");
                     if(values.type === "patient") {
                         router.push('/test');
