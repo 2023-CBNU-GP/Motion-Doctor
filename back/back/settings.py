@@ -35,7 +35,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "api.apps.ApiConfig",
+    "channels",
+    "api",
+    "image_socket",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,6 +47,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 ]
+
+ASGI_APPLICATION = 'back.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -78,7 +88,7 @@ ROOT_URLCONF = "back.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'api')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

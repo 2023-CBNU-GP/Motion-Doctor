@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .serializers import *
-import OpencvManager as om
+# import OpencvManager as om
 
 class RegisterView(APIView):
     def post(self, request):
@@ -394,7 +394,8 @@ class FileUpload(APIView):
             raise AuthenticationFailed("Unauthenticated!")
 
         doctor = Doctor.objects.filter(id=payload['id']).first()
-        CVmanager=om.OpencvManager()
+        # CVmanager=om.OpencvManager()
+
         # 동영상 저장하는 부분
         file_data = request.FILES.getlist('file_path')
         name_data = request.POST.getlist('name')
@@ -408,7 +409,7 @@ class FileUpload(APIView):
                 raise serializers.ValidationError(str(i + 1) + "번째 데이터의 name이 중복되었습니다.")
 
         for i in range(int(request.POST.get('num'))):
-            CVmanager.doctorManage(file_data[i])
+            # CVmanager.doctorManage(file_data[i])
             form = Correctpic()
             form.picturefilename = file_data[i]
             form.exercisename = name_data[i]
@@ -462,8 +463,8 @@ class PatientEvaluation(APIView):
         form.picturefilename = request.FILES.get('file_path')
 
         # 여기가 모델로 파일을 넘겨서 점수 반환하는 부분입니다.
-        CVmanager=om.OpencvManager()
-        CVmanager.patientManage(form.picturefilename)
+        # CVmanager=om.OpencvManager()
+        # CVmanager.patientManage(form.picturefilename)
         # request.FILES.get('file_path')를 모델로 넘겨서 점수 반환해서 아래 score 변수에 저장해주세욤
         score = 0
 
