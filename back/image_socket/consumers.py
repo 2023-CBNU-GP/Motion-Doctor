@@ -10,7 +10,7 @@ class Consumers(WebsocketConsumer):
         self.accept()  # websocket 연결
 
         self.send(text_data=json.dumps({
-            'type': 'connection_established',
+            'type': 'connection established',
             'message': 'You are now connected!'
         }))
 
@@ -20,9 +20,12 @@ class Consumers(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         # 영상 받기
         print("메시지를 받았습니다.")
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        print(message)
 
         # 영상으로부터 사물 인식 및 각도 측정 결과를 프론트에 전송
         self.send(text_data=json.dumps({
-            'type': 'current_state',
-            'message': 'message'
+            'type': 'received value',
+            'message': message
         }))

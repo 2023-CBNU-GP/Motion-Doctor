@@ -11,3 +11,4 @@ pillow
 mysqlclient
 uwsgi
 channels
+daphne
