@@ -36,8 +36,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "channels",
-    "api",
-    "image_socket",
+    "api.apps.ApiConfig",
+    "image_socket.apps.ImageSocketConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,13 +48,15 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-ASGI_APPLICATION = 'back.asgi.application'
+# django-chaneels 를 위한 설정
+ASGI_APPLICATION = 'back.routing.application'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
+use_websockets = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
