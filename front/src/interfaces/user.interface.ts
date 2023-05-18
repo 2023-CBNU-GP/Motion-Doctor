@@ -1,6 +1,7 @@
 export interface Success {
-    id: string,
-    email: string,
+    id?: string,
+    email?: string,
+    emailCode?: string,
 }
 
 export interface DoctorSign {

@@ -1,32 +1,33 @@
 import Layout from "@md/components/layout";
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
-import Item, { UploadItem } from "@md/components/upload/item";
 import { useEffect, useRef, useState } from "react";
+import { UploadItem } from "@md/interfaces/upload.interface";
+import Item from "@md/components/upload/item";
 
 export default function Upload () {
     const [item, setItem] = useState({} as UploadItem);
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<UploadItem[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const nextId = useRef(0);
 
     const handleSubmit = () => {
-        const data : UploadItem = {
+        const data : UploadItem | any = {
             id: nextId.current,
-            name: item.name,
-            filePath: inputRef.current?.value,
+            name: item.name as string,
+            filePath: inputRef.current?.value as string,
         };
         setItems(items.concat(data));
         nextId.current += 1;
         setItem({name: "", filePath: ""});
-        inputRef.current.value = null;
+        inputRef.current!.value = "";
     };
 
-    const handleRemove = (id) => {
-        setItems(items.filter(idx => idx.id !== id));
+    const handleRemove = (id : number) => {
+        setItems(items.filter(idx => idx!.id !== id));
     }
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: any) => {
         if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: inputRef.current?.value });
         else setItem({ ...item, [e.target.name]: e.target.value });
     };
@@ -60,7 +61,7 @@ export default function Upload () {
 
                 <div>
                     {
-                        items.map((idx) => {return <Item key={idx.id} itemData={idx} handleRemove={handleRemove}/>})
+                        items.map((idx) => {return <Item key={idx.id} {...idx} {...handleRemove}/>})
                     }
                 </div>
 

@@ -1,14 +1,15 @@
 import Layout from "@md/components/layout";
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
-import Item, { UploadItem } from "@md/components/upload/item";
+import Item from "@md/components/upload/item";
 import { useEffect, useRef, useState } from "react";
 import FormData from "form-data";
 import axios from "axios";
+import { UploadItem } from "@md/interfaces/upload.interface";
 
 export default function Upload () {
     const [item, setItem] = useState({} as UploadItem);
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<UploadItem[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const nextId = useRef(0);
 
@@ -36,14 +37,14 @@ export default function Upload () {
         console.log(items);
 
         setItem({name: "", filePath: ""});
-        inputRef.current.value = null;
+        inputRef.current!.value = "";
     };
 
-    const handleRemove = (id) => {
+    const handleRemove = (id : number) => {
         setItems(items.filter(idx => idx.id !== id));
     }
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e : any) => {
         if (e.target.name === "filePath") setItem({ ...item, [e.target.name]: e.target.files[0] });
         else setItem({ ...item, [e.target.name]: e.target.value });
     };
@@ -79,7 +80,7 @@ export default function Upload () {
 
                     <div>
                         {
-                            items.map((idx) => {return <Item key={idx.id} itemData={idx} handleRemove={handleRemove}/>})
+                            items.map((idx) => {return <Item key={idx.id} {...idx} {...handleRemove}/>})
                         }
                     </div>
 

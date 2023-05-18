@@ -13,7 +13,7 @@ export default function Patient () {
 
     const { values, errors, submitting, success, codeCheck, certifyEmail, certifyId, certifyCode, handleChange, handleSubmit } = useForm({
         initialValues: { login: false, id: "", name: "", email: "", emailValue: "gmail.com", password: "", type: "patient"},
-        onSubmit: (values) => {
+        onSubmit: (values : any) => {
             const data : PatientSign = {
                 id : values.id,
                 name : values.name,
@@ -21,7 +21,7 @@ export default function Patient () {
                 email : values.email+"@"+values.emailValue,
                 type : values.type
             };
-            axios.post('/api/signup', data <PatientSign>).then(response => {
+            axios.post('/api/signup', data as PatientSign).then(response => {
                 if(response.status === 200) {
                     alert("회원가입에 성공하셨습니다.");
                     router.push('/');

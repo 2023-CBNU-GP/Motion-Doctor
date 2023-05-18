@@ -2,7 +2,7 @@ import Head from 'next/head'
 import Layout from "@md/components/layout";
 import { useEffect, useState } from "react";
 import useForm from "@md/hooks/useForm";
-import validate from "@md/hooks/validate";
+import validate, { InitialValue } from "@md/hooks/validate";
 import { UserLogin } from "@md/interfaces/user.interface";
 import { useRouter } from "next/router";
 import axios from "axios";
@@ -17,13 +17,13 @@ export default function Home() {
 
     const { values, errors, submitting, handleChange, handleSubmit } = useForm({
         initialValues: { login: true, id: "", password: "", type: "patient"},
-        onSubmit: (values) => {
+        onSubmit: (values : InitialValue) => {
             const data : UserLogin = {
                 id : values.id,
-                password : values.password,
+                password : values.password as string,
                 type : values.type
             };
-            axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/login', data <UserLogin>).then(response => {
+            axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/login', data as UserLogin).then(response => {
                 if(response.status === 200) {
                     setCookie('jwt', response.data.jwt, {
                         path : '/',

@@ -12,7 +12,23 @@ export interface Errors {
     type: string
 }
 
-export default function validate({ login, id, name, license, hospitalname, email, emailValue, password, checkPassword, isEmailCertified, isIdCertified, emailCode, type }) {
+export interface InitialValue {
+    login: boolean,
+    id: string,
+    name?: string,
+    email?: string,
+    emailValue?: string,
+    password?: string,
+    checkPassword?: string,
+    type: string,
+    license?: string,
+    hospitalname?: string,
+    isIdCertified?: boolean,
+    emailCode?: string,
+    isEmailCertified?: boolean,
+}
+
+export default function validate({ login, id, name, license, hospitalname, email, emailValue, password, checkPassword, isEmailCertified, isIdCertified, emailCode, type } : InitialValue) {
     const errors = {} as Errors;
     if (login) {
         if (!id) {

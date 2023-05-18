@@ -3,12 +3,12 @@ import { Errors } from "@md/hooks/validate";
 import axios from "@md/hooks/axiosInstance";
 import { Success } from "@md/interfaces/user.interface";
 
-function useForm({ initialValues, onSubmit, validate }) {
+function useForm({ initialValues, onSubmit, validate }: any) {
     const [values, setValues] = useState(initialValues);
     const [errors, setErrors] = useState({} as Errors);
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState({} as Success);
-    const [codeCheck, setCodeCheck] = useState();
+    const [codeCheck, setCodeCheck] = useState<any>(null);
 
     const certifyId = () => {
         axios.post('/api/id_check', {
@@ -45,7 +45,7 @@ function useForm({ initialValues, onSubmit, validate }) {
             code: parseInt(values.emailCode)
         }).then((response) => {
             if(response.status === 200) {
-                setSuccess({emailCode: "이메일 인증이 완료되었습니다"});
+                setSuccess({email: "이메일 인증이 완료되었습니다"});
                 values["isCodeCertified"] = true;
                 errors["email"] = "";
             }
@@ -55,12 +55,12 @@ function useForm({ initialValues, onSubmit, validate }) {
     }
 
 
-    const handleChange = (event) => {
+    const handleChange = (event: any) => {
         const { name, value } = event.target;
         setValues({ ...values, [name]: value });
     }
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: any) => {
         setSubmitting(true);
         event.preventDefault();
         setErrors(validate(values));

@@ -1,62 +1,23 @@
 import Webcam from "react-webcam";
-import { useCallback, useRef, useState } from "react";
-import * as posenet from '@tensorflow-models/posenet';
-import { drawKeypoints, drawSkeleton } from "@md/hooks/drawPoints";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function WebCam() {
     const webcamRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const canvasRef = useRef(null);
-
-    const detectWebcamFeed = async (posenet_model) => {
-        if (
-            typeof webcamRef.current !== "undefined" &&
-            webcamRef.current !== null &&
-            webcamRef.current.video.readyState === 4
-        ) {
-            // Get Video Properties
-            const video = webcamRef.current.video;
-            const videoWidth = webcamRef.current.video.videoWidth;
-            const videoHeight = webcamRef.current.video.videoHeight;
-            // Set video width
-            webcamRef.current.video.width = videoWidth;
-            webcamRef.current.video.height = videoHeight;
-            // Make Estimation
-            const pose = await posenet_model.estimateSinglePose(video);
-            drawResult(pose, video, videoWidth, videoHeight, canvasRef);
-        }
-    };
-
-    const runPosenet = async () => {
-        const posenet_model = await posenet.load({
-            inputResolution: { width: 640, height: 480 },
-            scale: 0.8
-        });
-        //
-        setInterval(() => {
-            detectWebcamFeed(posenet_model);
-        }, 100);
-    };
-
-    runPosenet();
-
-    const drawResult = (pose, video, videoWidth, videoHeight, canvas) => {
-        const ctx = canvas.current?.getContext("2d");
-        if (ctx) {
-            canvas.current.width = videoWidth;
-            canvas.current.height = videoHeight;
-            drawKeypoints(pose["keypoints"], 0.6, ctx);
-            drawSkeleton(pose["keypoints"], 0.7, ctx);
-        }
-    };
-
-
+    const mediaRecorderRef = useRef<any>(null);
 
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
 
+    useEffect(() => {
+        while (capturing) {
+            setTimeout(() => {console.log("true")}, 30000)
+        }
+        // if (capturing)
+        // else console.log("false");
+    }, [capturing]);
+
     const handleDataAvailable = useCallback(
-        ({ data }) => {
+        ({ data } : any) => {
             if (data.size > 0) {
                 setRecordedChunks((prev) => prev.concat(data));
             }
@@ -66,7 +27,7 @@ export default function WebCam() {
 
     const handleStartCaptureClick = useCallback(() => {
         setCapturing(true);
-
+        //@ts-ignore
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
             mimeType: "video/webm",
         });
@@ -83,16 +44,22 @@ export default function WebCam() {
     }, [mediaRecorderRef, setCapturing]);
 
     const handleDownload = useCallback(() => {
+        // if (recordedChunks.length) {
+        //     const blob = new Blob(recordedChunks, {
+        //         type: "video/mp4",
+        //     });
+        //     console.log(blob);
+        // }
         if (recordedChunks.length) {
             const blob = new Blob(recordedChunks, {
-                type: "video/mp4",
+                type: "video/webm",
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             document.body.appendChild(a);
-            a.style = "display: none";
+            a.setAttribute('style', "display: none");
             a.href = url;
-            a.download = "motion.mp4";
+            a.download = "motion.webm";
             a.click();
             window.URL.revokeObjectURL(url);
             setRecordedChunks([]);
@@ -133,18 +100,7 @@ export default function WebCam() {
                 }}
                 audio={false}
                 ref={webcamRef}
-            />
-            <canvas
-                id={"canvas"}
-                ref={canvasRef}
-                style={{
-                    position: "absolute",
-                    marginTop: "2.5rem",
-                    textAlign: "center",
-                    zindex: 9,
-                    width: "100%",
-                    height: "100%"
-                }}
+                // screenshotFormat="image/jpeg"
             />
         </div>
     );
