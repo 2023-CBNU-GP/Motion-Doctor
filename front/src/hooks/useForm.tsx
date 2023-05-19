@@ -3,7 +3,7 @@ import { Errors } from "@md/hooks/validate";
 import axios from "@md/hooks/axiosInstance";
 import { Success } from "@md/interfaces/user.interface";
 
-function useForm({ initialValues, onSubmit, validate }: any) {
+function useForm({initialValues, onSubmit, validate}: any) {
     const [values, setValues] = useState(initialValues);
     const [errors, setErrors] = useState({} as Errors);
     const [submitting, setSubmitting] = useState(false);
@@ -15,7 +15,7 @@ function useForm({ initialValues, onSubmit, validate }: any) {
             id: values.id,
             type: values.type
         }).then((response) => {
-            if(response.status === 200) {
+            if (response.status === 200) {
                 values["isIdCertified"] = true;
                 errors["id"] = "";
                 setSuccess({id: "사용가능한 아이디입니다"});
@@ -27,10 +27,10 @@ function useForm({ initialValues, onSubmit, validate }: any) {
 
     const certifyEmail = () => {
         axios.post('/api/email_check', {
-            email: values.email + "@" +values.emailValue,
+            email: values.email + "@" + values.emailValue,
             type: values.type
         }).then((response) => {
-            if(response.status === 200) {
+            if (response.status === 200) {
                 alert("인증코드를 전송하였습니다");
                 values["isEmailCertified"] = true;
                 errors["email"] = "";
@@ -40,11 +40,11 @@ function useForm({ initialValues, onSubmit, validate }: any) {
     };
 
     const certifyCode = () => {
-        axios.post( '/api/code_check', {
+        axios.post('/api/code_check', {
             email: values.email + "@" + values.emailValue,
             code: parseInt(values.emailCode)
         }).then((response) => {
-            if(response.status === 200) {
+            if (response.status === 200) {
                 setSuccess({email: "이메일 인증이 완료되었습니다"});
                 values["isCodeCertified"] = true;
                 errors["email"] = "";
@@ -56,8 +56,8 @@ function useForm({ initialValues, onSubmit, validate }: any) {
 
 
     const handleChange = (event: any) => {
-        const { name, value } = event.target;
-        setValues({ ...values, [name]: value });
+        const {name, value} = event.target;
+        setValues({...values, [name]: value});
     }
 
     const handleSubmit = async (event: any) => {

@@ -12,7 +12,6 @@ export interface DoctorSign {
     doctornum: number,
     hospitalname: string,
     type: string
-
 }
 
 export interface PatientSign {

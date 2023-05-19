@@ -1,13 +1,13 @@
 export interface Errors {
-    id : string,
-    name : string,
-    license : string,
-    hospitalname : string,
-    email : string,
-    emailCode : string,
-    password : string,
-    checkPassword : string,
-    isEmailCertified : boolean,
+    id: string,
+    name: string,
+    license: string,
+    hospitalname: string,
+    email: string,
+    emailCode: string,
+    password: string,
+    checkPassword: string,
+    isEmailCertified: boolean,
     isIdCertified: boolean,
     type: string
 }
@@ -28,7 +28,21 @@ export interface InitialValue {
     isEmailCertified?: boolean,
 }
 
-export default function validate({ login, id, name, license, hospitalname, email, emailValue, password, checkPassword, isEmailCertified, isIdCertified, emailCode, type } : InitialValue) {
+export default function validate({
+                                     login,
+                                     id,
+                                     name,
+                                     license,
+                                     hospitalname,
+                                     email,
+                                     emailValue,
+                                     password,
+                                     checkPassword,
+                                     isEmailCertified,
+                                     isIdCertified,
+                                     emailCode,
+                                     type
+                                 }: InitialValue) {
     const errors = {} as Errors;
     if (login) {
         if (!id) {
@@ -54,7 +68,7 @@ export default function validate({ login, id, name, license, hospitalname, email
 
         if (!id) {
             errors.id = "아이디가 입력되지 않았습니다.";
-        } else if(!isIdCertified) {
+        } else if (!isIdCertified) {
             errors.id = "아이디 중복 확인이 완료되지 않았습니다.";
         }
 
@@ -64,7 +78,7 @@ export default function validate({ login, id, name, license, hospitalname, email
 
         if (!email) {
             errors.email = "이메일이 입력되지 않았습니다.";
-        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email+'@'+emailValue)) {
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email + '@' + emailValue)) {
             errors.email = "입력된 이메일이 유효하지 않습니다.";
         } else if (!isEmailCertified) {
             errors.email = "이메일 검증이 완료되지 않았습니다.";
@@ -76,7 +90,7 @@ export default function validate({ login, id, name, license, hospitalname, email
             errors.password = "8자 이상의 패스워드를 사용해야 합니다.";
         }
 
-        if (!checkPassword){
+        if (!checkPassword) {
             errors.checkPassword = "비밀번호가 입력되지 않았습니다.";
         } else if (checkPassword !== password) {
             errors.checkPassword = "비밀번호가 동일하지 않습니다.";
