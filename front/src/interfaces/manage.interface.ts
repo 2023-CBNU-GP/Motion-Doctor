@@ -8,7 +8,8 @@ export interface ManagePatients {
 export interface ManagePatientDetail {
     _id: string,
     patientName: string,
+    trainTitle: string,
     trainList: Array<string>,
     videoList: Array<string | File>,
-    scoreList: Array<number | string>,
+    scoreList: Array<number>,
 }
