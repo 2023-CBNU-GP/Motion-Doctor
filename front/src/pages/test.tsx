@@ -8,7 +8,7 @@ export default function Test() {
     const data = [
         {
             tag: '어깨운동',
-            img: '/video/KakaoTalk_Video_2023-03-31-10-57-34.mp4',
+            img: '/videos/KakaoTalk_Video_2023-03-31-10-57-34.mp4',
         },
         {
             tag: '호흡',

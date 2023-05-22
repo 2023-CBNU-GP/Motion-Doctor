@@ -31,7 +31,7 @@ export default function WebCam() {
         setCapturing(true);
         //@ts-ignore
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-            mimeType: "video/webm",
+            mimeType: "videos/webm",
         });
         mediaRecorderRef.current.addEventListener(
             "dataavailable",
@@ -48,13 +48,13 @@ export default function WebCam() {
     const handleDownload = useCallback(() => {
         // if (recordedChunks.length) {
         //     const blob = new Blob(recordedChunks, {
-        //         type: "video/mp4",
+        //         type: "videos/mp4",
         //     });
         //     console.log(blob);
         // }
         if (recordedChunks.length) {
             const blob = new Blob(recordedChunks, {
-                type: "video/webm",
+                type: "videos/webm",
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");

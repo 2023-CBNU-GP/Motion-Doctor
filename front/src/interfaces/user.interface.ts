@@ -27,3 +27,10 @@ export interface UserLogin {
     password: string,
     type: string
 }
+
+export interface DoctorInfo {
+    _id: string,
+    name: string,
+    hospitalName?: string,
+    patientNum?: number,
+}
