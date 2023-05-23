@@ -36,8 +36,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "channels",
-    "api.apps.ApiConfig",
-    "image_socket.apps.ImageSocketConfig",
+    "api",
+    "image_socket",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -90,7 +90,7 @@ ROOT_URLCONF = "back.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'api')],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
