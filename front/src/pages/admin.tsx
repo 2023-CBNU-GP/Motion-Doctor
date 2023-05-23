@@ -10,17 +10,23 @@ export default function Admin() {
     const [doctorListData, setDoctorListData] = useState<DoctorSign[]>([]);
 
     useEffect(() => {
-        axios.get("/api/user").then((response) => {
-            setDoctorListData(response.data);
+        axios.get("/api/doctor_list").then((response) => {
+            setDoctorListData(response.data.data);
             console.log(doctorListData)
         });
     }, []);
 
 
     // api 호출 한번만 적용
-    const request = debounce((value: object) => {
-        axios.post("/api/isapprove", value).then();
-    }, 3000);
+    const request = debounce((value: { id: string, state: boolean }) => {
+        const data = {id: value.id, type: "approval"};
+
+        if (!value.state) {
+            data['type'] = "ready";
+        }
+
+        axios.post("/api/isapprove", data).then();
+    });
 
     const handleApproval = useCallback((approval: object) => request(approval), []);
 

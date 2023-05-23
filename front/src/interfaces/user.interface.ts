@@ -5,7 +5,7 @@ export interface Success {
 }
 
 export interface DoctorSign {
-    uid?: string,
+    _id?: string,
     id: string,
     name: string,
     password?: string,
