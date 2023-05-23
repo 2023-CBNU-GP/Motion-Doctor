@@ -1,22 +1,15 @@
 import Webcam from "react-webcam";
 import { useCallback, useEffect, useRef, useState } from "react";
+import axios from "@md/utils/axiosInstance";
+import FormData from "form-data";
 
-export default function WebCam() {
-    const webcamRef = useRef(null);
+export default function WebCam({tag}: { tag: string }) {
+    const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>(null);
-
+    const [idx, setIdx] = useState(1);
+    const [userInfo, setUserInfo] = useState("");
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
-
-    useEffect(() => {
-        while (capturing) {
-            setTimeout(() => {
-                console.log("true")
-            }, 30000)
-        }
-        // if (capturing)
-        // else console.log("false");
-    }, [capturing]);
 
     const handleDataAvailable = useCallback(
         ({data}: any) => {
@@ -29,9 +22,8 @@ export default function WebCam() {
 
     const handleStartCaptureClick = useCallback(() => {
         setCapturing(true);
-        //@ts-ignore
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-            mimeType: "videos/webm",
+            mimeType: "video/webm",
         });
         mediaRecorderRef.current.addEventListener(
             "dataavailable",
@@ -43,31 +35,31 @@ export default function WebCam() {
     const handleStopCaptureClick = useCallback(() => {
         mediaRecorderRef.current.stop();
         setCapturing(false);
+        console.log("work?");
     }, [mediaRecorderRef, setCapturing]);
 
-    const handleDownload = useCallback(() => {
-        // if (recordedChunks.length) {
-        //     const blob = new Blob(recordedChunks, {
-        //         type: "videos/mp4",
-        //     });
-        //     console.log(blob);
-        // }
+    useEffect(() => {
         if (recordedChunks.length) {
             const blob = new Blob(recordedChunks, {
-                type: "videos/webm",
+                type: "video/webm",
             });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            document.body.appendChild(a);
-            a.setAttribute('style', "display: none");
-            a.href = url;
-            a.download = "motion.webm";
-            a.click();
-            window.URL.revokeObjectURL(url);
+            const formData = new FormData();
+            formData.append('name', userInfo + '-' + tag + '-' + idx.toString());
+            formData.append('file_path', blob);
+            formData.append('tag', tag);
+            formData.append('num', 1);
+            console.log(formData);
+            axios.post("/api/file_upload", formData).then(r => console.log(r));
             setRecordedChunks([]);
+            setIdx(idx + 1);
         }
     }, [recordedChunks]);
 
+    useEffect(() => {
+        axios.get("/api/user").then(response => {
+            setUserInfo(response.data.id);
+        });
+    }, []);
 
     return (
         <div className="w-full h-full flex flex-col">
@@ -89,16 +81,6 @@ export default function WebCam() {
                         </svg>
                     </div>
                 )}
-                {recordedChunks.length > 0 && (
-                    <div onClick={handleDownload} className="cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-8 h-8">
-                            <path fillRule="evenodd"
-                                  d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.379a.75.75 0 01-.53-.22L11.47 3.66A2.25 2.25 0 009.879 3H4.5a3 3 0 00-3 3v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v4.19l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V10.5z"
-                                  clipRule="evenodd"/>
-                        </svg>
-                    </div>
-                )}
-
             </div>
             <Webcam
                 style={{

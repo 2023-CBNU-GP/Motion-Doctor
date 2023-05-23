@@ -60,7 +60,7 @@ export default function Test() {
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
-                        <WebCam></WebCam>
+                        <WebCam tag={videoData.tag}></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">
