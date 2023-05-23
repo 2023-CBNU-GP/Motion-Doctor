@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from .serializers import *
 # import OpencvManager as om
 
+
 class RegisterView(APIView):
     def post(self, request):
         returnKey = ReturnKey()
@@ -151,8 +152,6 @@ class UserView(APIView):
                 "type": payload['type']
             }
 
-            serializer = PatientSerializer(data)
-
         elif (payload['type'] == 'doctor') or (payload['type'] == 'admin'):
             user = Doctor.objects.filter(id=payload['id']).first()
 
@@ -166,11 +165,10 @@ class UserView(APIView):
                 "type": payload['type']
             }
 
-            serializer = DoctorSerializer(data)
         else:
             raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
-        return Response(serializer.data)
+        return Response(data)
 
 
 class LogoutView(APIView):
@@ -531,20 +529,15 @@ class ApproveRejectDoctor(APIView):
 
 class ListDoctor(APIView):
     def get(self, request):
-        token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        serializer_list = []
+        data_list = []
 
         user_list = Doctor.objects.all()
         for user in user_list:
+            if user.state == "approval":
+                state = True
+            else:
+                state = False
+
             data = {
                 "_id": user.uid,
                 "name": user.name,
@@ -552,9 +545,8 @@ class ListDoctor(APIView):
                 "email": user.email,
                 "doctornum": user.doctornum,
                 "hospitalname": user.hospitalname,
-                "type": payload['type']
+                "state": state
             }
-            serializer = DoctorSerializer(data)
-            serializer_list.append(serializer.data)
+            data_list.append(data)
 
-        return Response({"data": serializer_list})
+        return Response({"data": data_list})
