@@ -1,11 +1,12 @@
 import Layout from "@md/components/layout";
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
-import { ManagePatients } from "@md/interfaces/manage.interface";
-import Link from "next/link";
+import { ManagePatients, RegisterTrain } from "@md/interfaces/manage.interface";
 import fetch from "node-fetch";
 import { DoctorInfo } from "@md/interfaces/user.interface";
-import Image from "next/image";
+import Profile from "@md/components/profile";
+import { useState } from "react";
+import ManageItem from "@md/components/manageItem";
 
 export async function getStaticProps() {
     const resManages = await fetch("http://localhost:3000" + "/api/get-manages");
@@ -14,18 +15,23 @@ export async function getStaticProps() {
     const resPatientNum = await fetch("http://localhost:3000" + "/api/get-patient-num");
     const patientNumData = await resPatientNum.json();
 
+    const resRegisterTrain = await fetch("http://localhost:3000" + "/api/get-train-list");
+    const registerTrainData = await resRegisterTrain.json();
+
     const resDoctor = await fetch("http://localhost:3000" + "/api/get-doctor");
     const doctorData = await resDoctor.json();
 
-    return {props: {manageData, doctorData, patientNumData}};
+    return {props: {manageData, doctorData, patientNumData, registerTrainData}};
 }
 
 // 의사가 진료하는 환자들을 확인할 수 있는 페이지
-export default function Manage({manageData, doctorData, patientNumData}: {
-    manageData: ManagePatients[],
+export default function Manage({manageData, doctorData, patientNumData, registerTrainData}: {
+    manageData: ManagePatients[] | null,
     doctorData: DoctorInfo,
-    patientNumData: DoctorInfo
+    patientNumData: DoctorInfo,
+    registerTrainData: RegisterTrain[] | null,
 }) {
+    const [tabIdx, setTabIdx] = useState(0);
     return (
         <div>
             <Head>
@@ -36,48 +42,28 @@ export default function Manage({manageData, doctorData, patientNumData}: {
             </Head>
             <Navigation></Navigation>
 
-
-            <div className="bg-gray-50 flex items-center py-12 mt-14 mb-10 pl-60">
-                <Image src="/images/doctor-image.png" alt="doctor-image" width="80"
-                       height="80"/>
-                <div className="pl-8">
-                    <div className="font-bold">
-                        <label className="text-xl">{doctorData.name}님</label> 반갑습니다!
-                    </div>
-                    <div className="flex gap-3">
-                        <div>병원명: <label className="text-color-info-600 font-bold">{doctorData.hospitalName}</label>
-                        </div>
-                        <div>담당 환자 수: <label
-                            className="text-color-info-600 font-bold">{patientNumData.patientNum}</label>명
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {
+                tabIdx === 0 ?
+                    <Profile doctorData={doctorData} patientNumData={null} registerTrain={registerTrainData}/> :
+                    <Profile doctorData={doctorData} patientNumData={patientNumData} registerTrain={null}/>
+            }
 
             <Layout>
-                <div className="flex flex-col mx-12 border-x border-t border-gray-50">
-                    <div className="flex items-center py-3.5 font-bold border-b-2 border-gray-50">
-                        <div className="w-[10%] flex justify-center">번호</div>
-                        <div className="w-[40%] flex justify-center">환자 이름</div>
-                        <div className="w-[40%] flex justify-center">재활 치료 리스트 명</div>
-                        <div className="w-[10%] flex justify-center">피드백 여부</div>
+
+                <div
+                    className="flex mb-8 gap-6 w-full pb-3 border-b-[1px] border-gray-300 justify-center drop-shadow-2xl">
+                    <div className={`${tabIdx === 0 && "font-bold"} hover:font-bold`} onClick={() => setTabIdx(0)}>등록 재활
+                        코스 목록
                     </div>
-                    {
-                        manageData.map((data: ManagePatients, idx) => {
-                            return (
-                                <Link href={'/doctor/manage/' + data._id}
-                                      className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
-                                    <div className="w-[10%] flex justify-center">{idx + 1}</div>
-                                    <div className="w-[40%] flex justify-center">{data.patientName}</div>
-                                    <div className="w-[40%] flex justify-center">{data.trainCourse}</div>
-                                    <div className="w-[10%] flex justify-center">
-                                        <input type="checkbox" checked={data.isCounseled}/>
-                                    </div>
-                                </Link>
-                            );
-                        })
-                    }
+                    <div className={`${tabIdx === 1 && "font-bold"} hover:font-bold`} onClick={() => setTabIdx(1)}>진찰 환자
+                        목록
+                    </div>
                 </div>
+
+                {
+                    tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={registerTrainData}/> :
+                        <ManageItem manageData={manageData} registerTrainData={null}/>
+                }
             </Layout>
         </div>
     );

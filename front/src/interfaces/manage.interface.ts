@@ -13,3 +13,10 @@ export interface ManagePatientDetail {
     videoList: Array<string | File>,
     scoreList: Array<number>,
 }
+
+export interface RegisterTrain {
+    _id: string,
+    doctorName: string,
+    trainTitle: string,
+    trainListLen: number,
+}
