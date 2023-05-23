@@ -527,3 +527,34 @@ class ApproveRejectDoctor(APIView):
         }
 
         return response
+
+
+class ListDoctor(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        serializer_list = []
+
+        user_list = Doctor.objects.all()
+        for user in user_list:
+            data = {
+                "_id": user.uid,
+                "name": user.name,
+                "id": user.id,
+                "email": user.email,
+                "doctornum": user.doctornum,
+                "hospitalname": user.hospitalname,
+                "type": payload['type']
+            }
+            serializer = DoctorSerializer(data)
+            serializer_list.append(serializer.data)
+
+        return Response({"data": serializer_list})

@@ -15,4 +15,5 @@ urlpatterns = [
   path('file_delete', views.FileDelete.as_view()),
   path('evaluation', views.PatientEvaluation.as_view()),
   path('isapprove', views.ApproveRejectDoctor.as_view()),
+  path('doctor_list', views.ListDoctor.as_view())
 ]

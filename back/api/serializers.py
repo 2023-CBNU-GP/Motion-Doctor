@@ -18,4 +18,3 @@ class DoctorSerializer(serializers.Serializer):
     doctornum = serializers.IntegerField()
     hospitalname = serializers.CharField(max_length=50)
     type = serializers.CharField(max_length=10)
-
