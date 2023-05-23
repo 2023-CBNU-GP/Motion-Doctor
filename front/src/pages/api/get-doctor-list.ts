@@ -7,7 +7,7 @@ export default function handler(
 ) {
     res.status(200).json([
         {
-            uid: "1",
+            _id: "1",
             name: "홍길동",
             id: "asdf",
             email: "adsifjas@djafoid",
@@ -16,7 +16,7 @@ export default function handler(
             state: false
         },
         {
-            uid: "2",
+            _id: "2",
             name: "홍길동",
             id: "gsdj",
             email: "adsifjas@djafoid",
