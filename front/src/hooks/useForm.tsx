@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Errors } from "@md/hooks/validate";
-import axios from "@md/hooks/axiosInstance";
+import axios from "@md/utils/axiosInstance";
 import { Success } from "@md/interfaces/user.interface";
 
 function useForm({initialValues, onSubmit, validate}: any) {

@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { ManagePatientDetail, ManagePatients } from "@md/interfaces/manage.interface";
 import { useEffect, useState } from "react";
 

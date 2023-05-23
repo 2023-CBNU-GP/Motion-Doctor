@@ -6,6 +6,6 @@ export default function handler(
     res: NextApiResponse<DoctorInfo>
 ) {
     res.status(200).json(
-        {_id: "1", name: "홍길동", hospitalName: "삼성 병원"}
+        {_id: "1", name: "홍길동", hospitalname: "삼성 병원"}
     );
 }

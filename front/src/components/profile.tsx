@@ -17,7 +17,7 @@ export default function Profile({doctorData, patientNumData, registerTrain}: {
                        className="text-xl hover:text-color-primary-500 hover:border-b-2 border-color-primary-500">{doctorData.name}님</a> 반갑습니다!
                 </div>
                 <div className="flex gap-3">
-                    <div>병원명: <label className="text-color-info-600 font-bold">{doctorData.hospitalName}</label>
+                    <div>병원명: <label className="text-color-info-600 font-bold">{doctorData.hospitalname}</label>
                     </div>
                     {
                         patientNumData && <div>담당 환자 수: <label

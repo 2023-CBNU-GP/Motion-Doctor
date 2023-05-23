@@ -1,9 +1,8 @@
-import axios, { HeadersDefaults } from 'axios';
-import { getCookie } from "@md/hooks/cookies";
+import axios from 'axios';
 
 const axiosClient = axios.create({
     withCredentials: true,
-    baseURL : process.env.NEXT_PUBLIC_API_KEY
+    baseURL: process.env.NEXT_PUBLIC_API_KEY
 });
 
 // axiosClient.interceptors.request.use(

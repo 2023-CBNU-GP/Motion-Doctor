@@ -5,13 +5,15 @@ export interface Success {
 }
 
 export interface DoctorSign {
-    name: string,
+    uid?: string,
     id: string,
-    password: string,
+    name: string,
+    password?: string,
     email: string,
     doctornum: number,
     hospitalname: string,
-    type: string
+    type?: string
+    state?: boolean,
 }
 
 export interface PatientSign {
@@ -31,6 +33,6 @@ export interface UserLogin {
 export interface DoctorInfo {
     _id: string,
     name: string,
-    hospitalName?: string,
+    hospitalname?: string,
     patientNum?: number,
 }

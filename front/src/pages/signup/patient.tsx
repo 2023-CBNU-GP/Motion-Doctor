@@ -4,7 +4,7 @@ import Layout from "@md/components/layout";
 import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
 import { PatientSign } from "@md/interfaces/user.interface";
-import axios from "@md/hooks/axiosInstance";
+import axios from "@md/utils/axiosInstance";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 

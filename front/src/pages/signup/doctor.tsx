@@ -3,7 +3,7 @@ import Navigation from "@md/components/navigation";
 import Head from "next/head";
 import useForm from "@md/hooks/useForm";
 import validate from "@md/hooks/validate";
-import axios from "@md/hooks/axiosInstance";
+import axios from "@md/utils/axiosInstance";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { DoctorSign } from "@md/interfaces/user.interface";

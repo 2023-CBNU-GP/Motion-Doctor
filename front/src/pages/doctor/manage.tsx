@@ -2,7 +2,6 @@ import Layout from "@md/components/layout";
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
 import { ManagePatients, RegisterTrain } from "@md/interfaces/manage.interface";
-import fetch from "node-fetch";
 import { DoctorInfo } from "@md/interfaces/user.interface";
 import Profile from "@md/components/profile";
 import { useState } from "react";
