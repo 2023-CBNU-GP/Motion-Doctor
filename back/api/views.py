@@ -92,11 +92,13 @@ class LoginView(APIView):
             user = Patient.objects.filter(id=input_id).first()
         elif user_type == "doctor":
             user = Doctor.objects.filter(id=input_id).first()
-            if user.state != "approval":
-                raise AuthenticationFailed("User not allowed!")
-        # 관리자 (Doctor 테이블의 가장 첫 데이터로 가정)
-        elif user_type == "admin":
-            user = Doctor.objects.first()
+
+            # 관리자 (Doctor 테이블의 가장 첫 데이터로 가정)
+            if user.uid == Doctor.objects.first().uid:
+                user_type = 'admin'
+            else:
+                if user.state != "approval":
+                    raise AuthenticationFailed("User not allowed!")
         else:
             raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
@@ -140,10 +142,31 @@ class UserView(APIView):
 
         if payload['type'] == 'patient':
             user = Patient.objects.filter(id=payload['id']).first()
-            serializer = PatientSerializer(user)
-        elif payload['type'] == 'doctor':
+
+            data = {
+                "uid": user.uid,
+                "name": user.name,
+                "id": user.id,
+                "email": user.email,
+                "type": payload['type']
+            }
+
+            serializer = PatientSerializer(data)
+
+        elif (payload['type'] == 'doctor') or (payload['type'] == 'admin'):
             user = Doctor.objects.filter(id=payload['id']).first()
-            serializer = DoctorSerializer(user)
+
+            data = {
+                "_id": user.uid,
+                "name": user.name,
+                "id": user.id,
+                "email": user.email,
+                "doctornum": user.doctornum,
+                "hospitalname": user.hospitalname,
+                "type": payload['type']
+            }
+
+            serializer = DoctorSerializer(data)
         else:
             raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
 
@@ -223,13 +246,13 @@ class EmailView(APIView):
           <body align="center">
 
           <h1 align="center">
-                  <br>PF PROGRAM<br/><br/>
+                  <br>Motion Doctor<br/><br/>
           </h1>
 
           <br>
           <pre >
-            안녕하세요, PF PROGRAM 관리자입니다.
-            PR FROGAM의 가입을 위해서 고객님의 인증번호를 인증하셔야 합니다.
+            안녕하세요, Motion Doctor 관리자입니다.
+            Motion Doctor의 가입을 위해서 고객님의 인증번호를 인증하셔야 합니다.
             가입을 원하신다면 계정 본인 확인을 위한 아래의 인증 번호를 입력칸에 넣어주시길 바랍니다.<br/>
           </pre><br/><br/>
             <table cellpadding="0" cellspacing="0" width="400" height="100">
@@ -244,7 +267,7 @@ class EmailView(APIView):
 
         msg = MIMEText(html, "html")
 
-        msg['Subject'] = "[PF_Program] 이메일 인증"
+        msg['Subject'] = "[Motion Doctor] 이메일 인증"
         msg['From'] = sendEmail
         msg['To'] = recvEmail
 
