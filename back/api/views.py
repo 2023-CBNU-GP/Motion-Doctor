@@ -15,6 +15,9 @@ from rest_framework.response import Response
 
 from .serializers import *
 # import OpencvManager as om
+import random
+import string
+from django.db.models import Count
 
 
 class RegisterView(APIView):
@@ -425,16 +428,17 @@ class FileUpload(APIView):
         if int(request.POST.get('num')) != len(file_data):
             raise serializers.ValidationError("업로드할 파일 개수가 맞지 않습니다.")
 
-        for i, name in enumerate(name_data):
-            if Correctpic.objects.filter(exercisename=name_data[i]).first():
-                raise serializers.ValidationError(str(i + 1) + "번째 데이터의 name이 중복되었습니다.")
+        n = 10    # 문자의 개수(문자열의 크기)
+        rand_str = ""  # 문자열
+        for i in range(n):
+            rand_str += str(random.choice(string.ascii_uppercase))
 
         for i in range(int(request.POST.get('num'))):
             # CVmanager.doctorManage(file_data[i])
             form = Correctpic()
             form.picturefilename = file_data[i]
             form.exercisename = name_data[i]
-            form.exercisetype = type_data[i]
+            form.exercisetype = type_data[i] + '_' + rand_str
             form.doctorid = doctor
             form.save()
 
@@ -467,7 +471,7 @@ class FileDelete(APIView):
 # 환자 모션 웹캠 저장 및 점수 반환 API
 class PatientEvaluation(APIView):
     def post(self, request):
-        # 현재 로그인되어있는 doctor 정보 받아오기
+        # 현재 로그인되어있는 patient 정보 받아오기
         token = request.COOKIES.get('jwt')
 
         if not token:
@@ -551,3 +555,21 @@ class ListDoctor(APIView):
             data_list.append(data)
 
         return Response({"data": data_list})
+
+
+class ListDoctorVideo(APIView):
+    def get(self, request):
+        data_list = []
+
+        video_list = Correctpic.objects.all().values('doctorid', 'exercisetype').annotate(Count('uid'))
+        for video in video_list:
+            doctor = Doctor.objects.filter(uid=video['doctorid']).first()
+            data = {
+                "doctor_name": doctor.name,
+                "doctor_hospitalName": doctor.hospitalname,
+                "exercise_type": video['exercisetype'],
+                "video_num": video['uid__count']
+            }
+            data_list.append(data)
+
+        return Response({'data': data_list})

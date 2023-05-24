@@ -14,7 +14,7 @@ def patient_file_path(instance, filename):
 class Correctpic(models.Model):
     uid = models.AutoField(primary_key=True)
     picturefilename = models.FileField(db_column='pictureFileName', max_length=255, upload_to=doctor_file_path, blank=False)  # Field name made lowercase.
-    exercisename = models.CharField(db_column='exerciseName', max_length=50, unique=True)  # Field name made lowercase.
+    exercisename = models.CharField(db_column='exerciseName', max_length=50)  # Field name made lowercase.
     exercisetype = models.CharField(db_column='exerciseType', max_length=50)  # Field name made lowercase.
     doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId')  # Field name made lowercase.
 
