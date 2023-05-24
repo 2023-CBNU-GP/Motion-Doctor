@@ -11,7 +11,7 @@ export async function getStaticProps() {
     const resManages = await fetch("http://localhost:3000" + "/api/get-manages");
     const manageData = await resManages.json();
 
-    const resPatientNum = await fetch("http://localhost:3000" + "/api/get-patient-num");
+    const resPatientNum = await fetch("http://localhost:3000" + "/api/get-doctor-patient-num");
     const patientNumData = await resPatientNum.json();
 
     const resRegisterTrain = await fetch("http://localhost:3000" + "/api/get-train-list");
