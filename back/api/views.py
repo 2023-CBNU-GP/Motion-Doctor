@@ -532,6 +532,7 @@ class ListDoctor(APIView):
         data_list = []
 
         user_list = Doctor.objects.all()
+        user_list = user_list[1:]
         for user in user_list:
             if user.state == "approval":
                 state = True

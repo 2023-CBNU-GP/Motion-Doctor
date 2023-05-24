@@ -44,6 +44,7 @@ class Consumers(WebsocketConsumer):
         print(img_file)
 
         # 영상으로부터 사물 인식 결과를 프론트에 전송
+        # 여기에 img_file 모델로 넘겨서 true or false 리턴하게 해주면 됨!
 
 
 
