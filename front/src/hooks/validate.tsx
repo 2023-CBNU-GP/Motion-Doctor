@@ -82,6 +82,8 @@ export default function validate({
             errors.email = "입력된 이메일이 유효하지 않습니다.";
         } else if (!isEmailCertified) {
             errors.email = "이메일 검증이 완료되지 않았습니다.";
+        } else if (errors.emailCode === "유효하지 않은 코드 입니다.") {
+            errors.emailCode = "유효하지 않은 코드 입니다.";
         }
 
         if (!password) {

@@ -45,7 +45,7 @@ function useForm({initialValues, onSubmit, validate}: any) {
             code: parseInt(values.emailCode)
         }).then((response) => {
             if (response.status === 200) {
-                setSuccess({email: "이메일 인증이 완료되었습니다"});
+                setSuccess({emailCode: "이메일 인증이 완료되었습니다"});
                 values["isCodeCertified"] = true;
                 errors["email"] = "";
             }
