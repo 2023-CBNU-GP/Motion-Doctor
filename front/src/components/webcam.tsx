@@ -3,14 +3,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "@md/utils/axiosInstance";
 import FormData from "form-data";
 
+const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
+
 export default function WebCam({tag}: { tag: string }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>(null);
+    const interval = useRef<any>();
+    const socket = useRef<any>();
+
     const [idx, setIdx] = useState(1);
-    const [userInfo, setUserInfo] = useState("");
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
 
+    // 옛날 영상 없애기
     const handleDataAvailable = useCallback(
         ({data}: any) => {
             if (data.size > 0) {
@@ -20,46 +25,60 @@ export default function WebCam({tag}: { tag: string }) {
         [setRecordedChunks]
     );
 
+    // 영상 촬영 시작 && object-detection 을 위한 10초 마다 이미지 전송
     const handleStartCaptureClick = useCallback(() => {
         setCapturing(true);
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
             mimeType: "video/webm",
         });
+
         mediaRecorderRef.current.addEventListener(
             "dataavailable",
             handleDataAvailable
         );
         mediaRecorderRef.current.start();
+
+        interval.current = setInterval(() => {
+            const pictureSrc = webcamRef.current.getScreenshot();
+            console.log(URL);
+            socket.current = new WebSocket(URL);
+
+            socket.current.onopen = () => {
+                console.log("연결 성공");
+                socket.current.send(pictureSrc);
+            }
+            socket.current.onmessage = (data: string) => {
+                console.log(data);
+            }
+        }, 10000);
+
     }, [webcamRef, setCapturing, mediaRecorderRef, handleDataAvailable]);
 
+    // 영상 촬영 종료 && interval 제거
     const handleStopCaptureClick = useCallback(() => {
         mediaRecorderRef.current.stop();
+        clearInterval(interval.current);
+        socket.current.onclose = () => {
+            console.log("연결 해제")
+        };
         setCapturing(false);
-        console.log("work?");
     }, [mediaRecorderRef, setCapturing]);
 
+    // 촬영 종료된 영상이 있으면 서버에 전송
     useEffect(() => {
         if (recordedChunks.length) {
             const blob = new Blob(recordedChunks, {
                 type: "video/webm",
             });
             const formData = new FormData();
-            formData.append('name', userInfo + '-' + tag + '-' + idx.toString());
+            formData.append('name', "sholder_motion1");
             formData.append('file_path', blob);
-            formData.append('tag', tag);
-            formData.append('num', 1);
             console.log(formData);
-            axios.post("/api/file_upload", formData).then(r => console.log(r));
+            axios.post("/api/evaluation", formData).then(r => console.log(r));
             setRecordedChunks([]);
             setIdx(idx + 1);
         }
     }, [recordedChunks]);
-
-    useEffect(() => {
-        axios.get("/api/user").then(response => {
-            setUserInfo(response.data.id);
-        });
-    }, []);
 
     return (
         <div className="w-full h-full flex flex-col">
@@ -90,7 +109,7 @@ export default function WebCam({tag}: { tag: string }) {
                 }}
                 audio={false}
                 ref={webcamRef}
-                // screenshotFormat="image/jpeg"
+                screenshotFormat="image/jpeg"
             />
         </div>
     );

@@ -1,5 +1,5 @@
 import Navigation from "@md/components/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import WebCam from "@md/components/webcam";
 
@@ -27,6 +27,10 @@ export default function Test() {
             vidRef.current.pause();
         }
     }
+
+    useEffect(() => {
+        alert("**새로고침이 될 시, 기존 테스트 데이터들이 모두 삭제됩니다** \n 테스트 영상의 길이는 1분 이상이어야 합니다");
+    }, [])
 
     return (
         <div className="h-screen overflow-hidden">
@@ -65,14 +69,13 @@ export default function Test() {
                 </div>
                 <div className="h-full w-[40%]">
                     {videoData.img &&
-                        <video onClick={() => {
-                            setIsPause(!isPause);
-                            handlePlayVideo();
-                        }} ref={vidRef}
-                               autoPlay loop
-                               style={{width: '100%', height: '100%', background: 'black', cursor: 'pointer'}}>
-                            <source src={videoData.img}/>
-                        </video>
+                        <video controls src={videoData.img}
+                               style={{width: "100%", height: "93%", background: 'black', cursor: 'pointer'}}
+                               onClick={() => {
+                                   setIsPause(!isPause);
+                                   handlePlayVideo();
+                               }} ref={vidRef}
+                        ></video>
                     }
                 </div>
             </div>
