@@ -46,7 +46,7 @@ class FileUpload(APIView):
             form = Correctpic()
             form.picturefilename = file_data[i]
             form.exercisename = name_data[i]
-            form.exercisetype = type_data[i] + '_' + rand_str
+            form.exercisetype = type_data[i] + '-' + rand_str
             form.doctorid = doctor
             form.save()
 

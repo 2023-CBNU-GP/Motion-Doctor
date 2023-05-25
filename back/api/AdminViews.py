@@ -7,6 +7,7 @@ from . import serializers
 import json
 
 
+# 관리자가 의사를 승인할 것인지 안 할 것인지 선택하는 api
 class ApproveRejectDoctor(APIView):
     def post(self, request):
         body = json.loads(request.body.decode('utf-8'))
@@ -14,6 +15,7 @@ class ApproveRejectDoctor(APIView):
 
         doctor_type = body["type"]
 
+        # ready도 가능하게 바꾸기. . .
         if doctor_type == "approval":
             doctor.state = "approval"
         elif doctor_type == "rejection":
@@ -31,6 +33,7 @@ class ApproveRejectDoctor(APIView):
         return response
 
 
+# 의사 정보 리턴해주는 api
 class ListDoctor(APIView):
     def get(self, request):
         data_list = []
@@ -58,6 +61,7 @@ class ListDoctor(APIView):
 
 
 class ListDoctorVideo(APIView):
+    # 전체 의사에 대해 올린 동영상 정보 리턴해주는 api
     def get(self, request):
         data_list = []
 
@@ -67,9 +71,28 @@ class ListDoctorVideo(APIView):
             data = {
                 "doctor_name": doctor.name,
                 "doctor_hospitalName": doctor.hospitalname,
-                "exercise_type": video['exercisetype'],
-                "video_num": video['uid__count']
+                "video_num": video['uid__count'],
+                "type": video['exercisetype'].split('-')[0],
+                "typeIdx": video['exercisetype'].split('-')[1]
             }
             data_list.append(data)
 
         return Response({'data': data_list})
+
+    # 특정 의사가 올린 동영상 리턴 api
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        exercise_type = body["type"]
+
+        video_list = Correctpic.objects.filter(exercisetype=exercise_type).values()
+        doctor = Doctor.objects.filter(uid=video_list[0]['doctorid_id']).first()
+
+        data = {
+            "doctor_name": doctor.name,
+            "doctor_hospitalName": doctor.hospitalname,
+            "courseName": video_list[0]['exercisetype'].split('-')[0],
+            "trainList": [video_list[0]['exercisename'], video_list[1]['exercisename']],
+            "filePathList": [video_list[0]['picturefilename'], video_list[1]['picturefilename']]
+        }
+
+        return Response({'data': data})
