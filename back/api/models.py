@@ -1,14 +1,26 @@
 import os
 from django.db import models
 from django.conf import settings
+import random
+import string
 
 
 def doctor_file_path(instance, filename):
-    return f"doctor/{instance.doctorid.uid}/{instance.exercisename}.mp4"
+    n = 10  # 문자의 개수(문자열의 크기)
+    rand_str = ""  # 문자열
+    for i in range(n):
+        rand_str += str(random.choice(string.ascii_uppercase))
+
+    return f"doctor/{instance.doctorid.uid}/{filename.split('.')[0]+'-'+rand_str}.mp4"
 
 
 def patient_file_path(instance, filename):
-    return f"patient/{instance.patientid.uid}/{instance.correctpicid.exercisename}.mp4"
+    n = 10  # 문자의 개수(문자열의 크기)
+    rand_str = ""  # 문자열
+    for i in range(n):
+        rand_str += str(random.choice(string.ascii_uppercase))
+
+    return f"patient/{instance.patientid.uid}/{instance.patientid.id+'-'+instance.correctpicid.exercisename+'-'+rand_str}.mp4"
 
 
 class Correctpic(models.Model):
@@ -86,3 +98,7 @@ class Patientpic(models.Model):
     class Meta:
         managed = False
         db_table = 'patientPic'
+
+    def delete(self, *args, **kwargs):
+        super(Patientpic, self).delete(*args, **kwargs)
+        os.remove(os.path.join(settings.MEDIA_ROOT, self.picturefilename.path))

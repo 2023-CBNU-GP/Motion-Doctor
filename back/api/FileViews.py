@@ -102,7 +102,7 @@ class PatientEvaluation(APIView):
         score = 0
 
         form.score = score
-        form.correctpicid = Correctpic.objects.filter(exercisename=request.POST.get('name')).first()
+        form.correctpicid = Correctpic.objects.filter(exercisename=request.POST.get('name'), exercisetype=request.POST.get('type')).first()
         form.patientid = patient
         form.save()
 
