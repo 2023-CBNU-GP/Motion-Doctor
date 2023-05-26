@@ -1,46 +1,45 @@
 version: "3"
 
 services:
-    mysql:
-        image: mysql:latest
-        restart: always
-        volumes:
-          - dbdata:/var/lib/mysql
-        ports:
-          - 3309:3306
-        cap_add:
-          - SYS_NICE
-        environment:
-          - MYSQL_DATABASE=md-db
-          - MYSQL_ROOT_PASSWORD=doctor
-          - MYSQL_USER=motion
-          - MYSQL_PASSWORD=doctor
+  mysql:
+    image: mysql:latest
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - 3309:3306
+    cap_add:
+      - SYS_NICE
+    environment:
+      - MYSQL_DATABASE=md-db
+      - MYSQL_ROOT_PASSWORD=doctor
+      - MYSQL_USER=motion
+      - MYSQL_PASSWORD=doctor
 
-    next:
-        restart: always
-        build:
-          context: ./front
-          dockerfile: Dockerfile
-        ports:
-          - 3000:3000
-        volumes:
-          - ./front/:/front
-          - ./front/node_modules/:/front/node_modules
+  next:
+    restart: always
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./front/:/front
+      - ./front/node_modules/:/front/node_modules
 
-    django:
-        build:
-          context: ./back
-          dockerfile: Dockerfile
-        ports:
-          - 8000:8000
-        volumes:
-          - ./back:/back
-          - ./media:/usr/src/app/media
-        depends_on:
-          - mysql
+  django:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./back:/back
+      - ./back/media:/usr/src/app/media
+    depends_on:
+      - mysql
 
 
 
 volumes:
-
   dbdata:

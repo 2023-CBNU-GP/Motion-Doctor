@@ -5,7 +5,7 @@ import FormData from "form-data";
 
 const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
 
-export default function WebCam({tag}: { tag: string }) {
+export default function WebCam({type}: { type: string }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>(null);
     const interval = useRef<any>();
