@@ -11,7 +11,7 @@ def doctor_file_path(instance, filename):
     for i in range(n):
         rand_str += str(random.choice(string.ascii_uppercase))
 
-    return f"doctor/{instance.doctorid.uid}/{filename.split('.')[0]+'-'+rand_str}.mp4"
+    return f"doctor/{instance.doctorid.uid}/{rand_str}.mp4"
 
 
 def patient_file_path(instance, filename):
