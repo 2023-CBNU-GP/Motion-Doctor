@@ -43,7 +43,7 @@ class DoctorComment(APIView):
         return response
 
 
-# 특정 의사가 본인의 재활 코스를 수강한 환자 목록
+# 특정 의사가 본인의 재활 코스를 수강한 환자 목록 리턴하는 api
 # DB 수정!
 class ManagePatientList(APIView):
     def get(self, request):
@@ -91,7 +91,8 @@ class ManagePatientList(APIView):
         return Response({'data': data_list})
 
 
-class PatientTestList(APIView):
+# 특정 환자가(자신이) 테스트한 재활 코스 전체 목록 확인하는 api
+class DoctorPatientList(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -117,7 +118,6 @@ class PatientTestList(APIView):
                 type_dict[correctpic.exercisetype] += 1
                 type_list.append(False)
 
-        print(type_list)
         data_list = []
         i,j=1,0
         for patientpic in patientpic_list:
@@ -147,9 +147,10 @@ class PatientTestList(APIView):
 
 
 # 특정 의사가 특정 환자의 재활 테스트 영상 보기 위한 정보
-class PatientTest(APIView):
-    def post(self, request):
+class PatientTestList(APIView):
+    def post(self, request, uid):
         token = request.COOKIES.get('jwt')
+        body = json.loads(request.body.decode('utf-8'))
 
         if not token:
             raise AuthenticationFailed("Unauthenticated!")
@@ -159,4 +160,25 @@ class PatientTest(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Unauthenticated!")
 
-        # 이부분을 어떻게 구현할지 희진이와 대화 필요.
+        patient = Patient.objects.filter(uid=uid).first()
+        correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
+
+        name, videoList, scoreList = [], [], []
+        type=''
+        for correctpic in correctpic_list:
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).first()
+            type = correctpic.exercisetype
+            name.append(correctpic.exercisename)
+            videoList.append(str(patientpic.picturefilename))
+            scoreList.append(patientpic.score)
+
+        data = {
+            "_id": 1,
+            "patientName": patient.name,
+            "trainTitle": type.split('-')[0],
+            "trainList": name,
+            "videoList": videoList,
+            "scoreList": scoreList
+        }
+
+        return Response({'data': data})
