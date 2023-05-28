@@ -91,6 +91,61 @@ class ManagePatientList(APIView):
         return Response({'data': data_list})
 
 
+class PatientTestList(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        patient = Patient.objects.filter(id=payload["id"]).first()
+
+        patientpic_list = Patientpic.objects.filter(patientid=patient)
+        type_dict = {}
+        type_list = []
+        for patientpic in patientpic_list:
+            correctpic = Correctpic.objects.filter(uid=patientpic.correctpicid.uid).first()
+            if type_dict.get(correctpic.exercisetype) is None:
+                type_dict[correctpic.exercisetype] = 1
+                type_list.append(True)
+            else:
+                type_dict[correctpic.exercisetype] += 1
+                type_list.append(False)
+
+        print(type_list)
+        data_list = []
+        i,j=1,0
+        for patientpic in patientpic_list:
+            if type_list[j]:
+                correctpic = Correctpic.objects.filter(uid=patientpic.correctpicid.uid).first()
+                doctor = Doctor.objects.filter(uid=correctpic.doctorid.uid).first()
+                comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
+                if comment is None:
+                    text = None
+                else:
+                    text = comment.text
+                data = {
+                    "_id": i,
+                    "trainTitle": correctpic.exercisetype.split('-')[0],
+                    "trainNum": type_dict[correctpic.exercisetype],
+                    "doctorName": doctor.name,
+                    "hospitalName": doctor.hospitalname,
+                    "counselResult": text
+                }
+                data_list.append(data)
+                i += 1
+                j += 1
+            else:
+                j += 1
+
+        return Response({'data': data_list})
+
+
 # 특정 의사가 특정 환자의 재활 테스트 영상 보기 위한 정보
 class PatientTest(APIView):
     def post(self, request):

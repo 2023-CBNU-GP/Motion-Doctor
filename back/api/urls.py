@@ -23,5 +23,6 @@ urlpatterns = [
   path('video_list', AdminViews.ListDoctorVideo.as_view()),
   path('manage_list', AdminViews.DoctorPatientNum.as_view()),
   path('comment', DoctorViews.DoctorComment.as_view()),
-  path('patient_list', DoctorViews.ManagePatientList.as_view())
+  path('patient_list', DoctorViews.ManagePatientList.as_view()),
+  path('test_list', DoctorViews.PatientTestList.as_view())
 ]
