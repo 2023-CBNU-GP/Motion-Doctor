@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { ManagePatients } from "@md/interfaces/manage.interface";
 
+// 특정 의사가 본인의 재활 코스를 수강(?)한 환자 목록
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<ManagePatients[]>

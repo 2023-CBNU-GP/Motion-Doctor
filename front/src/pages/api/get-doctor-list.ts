@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { DoctorSign } from "@md/interfaces/user.interface";
 
+// 전체 의사 목록
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<DoctorSign[]>

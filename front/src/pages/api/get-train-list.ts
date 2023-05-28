@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { RegisterTrain } from "@md/interfaces/manage.interface";
 
+// 특정 의사가 등록한 재활 코스 전체 보기
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<RegisterTrain[]>

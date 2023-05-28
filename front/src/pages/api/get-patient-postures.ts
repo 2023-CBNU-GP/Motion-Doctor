@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { PostureInfo } from "@md/interfaces/posture.interface";
 
+// 특정 환자가(자신이) 테스트한 재활 코스 전체 목록
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<PostureInfo[]>

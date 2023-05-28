@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+// 관리자, 의사 권한 조절 post 요청
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse

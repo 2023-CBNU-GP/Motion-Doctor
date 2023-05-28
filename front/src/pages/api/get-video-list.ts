@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { CourseInfo } from "@md/interfaces/course.interface";
 
+// 환자가 의사가 등록한 재활 코스 전체 보기
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<CourseInfo[]>

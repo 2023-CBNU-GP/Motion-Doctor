@@ -2,6 +2,7 @@ export interface ManagePatients {
     _id: string,
     patientName: string,
     trainCourse: string,
+    // 피드백 여부
     isCounseled: boolean,
 }
 
