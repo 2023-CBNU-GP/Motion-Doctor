@@ -2,6 +2,7 @@ from . import UserViews
 from . import EmailViews
 from . import FileViews
 from . import AdminViews
+from . import DoctorViews
 from django.urls import path
 
 urlpatterns = [
@@ -20,4 +21,6 @@ urlpatterns = [
   path('isapprove', AdminViews.ApproveRejectDoctor.as_view()),
   path('doctor_list', AdminViews.ListDoctor.as_view()),
   path('video_list', AdminViews.ListDoctorVideo.as_view()),
+  path('manage_list', AdminViews.DoctorPatientNum.as_view()),
+  path('comment', DoctorViews.DoctorComment.as_view())
 ]

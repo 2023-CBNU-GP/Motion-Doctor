@@ -96,3 +96,20 @@ class ListDoctorVideo(APIView):
         }
 
         return Response({'data': data})
+
+
+# 특정 의사가 관리하는 환자의 수를 리턴하는 API
+class DoctorPatientNum(APIView):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        doctor = Doctor.objects.filter(id=body["id"]).first()
+
+        manage_list = Manage.objects.filter(doctorid=doctor)
+
+        data = {
+            "_id": 1,
+            "name": doctor.name,
+            "patientNum": len(manage_list),
+        }
+
+        return Response({"data": data})
