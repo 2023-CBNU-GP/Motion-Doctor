@@ -12,3 +12,6 @@ mysqlclient
 uwsgi
 channels
 daphne
+opencv-python
+numpy
+mediapipe

@@ -16,7 +16,9 @@ import django
 django.setup()
 
 
-class Consumers(WebsocketConsumer):
+# 물체 인식을 위해 10s에 한 번씩 프론트에서 이미지를 보내면
+# 물체가 있는지 없는지를 판단해서 리턴하는 consumer
+class ImageConsumers(WebsocketConsumer):
     # websocket에 연결되면 호출되는 메소드
     def connect(self):
         print("웹소켓에 연결되었습니다.")
@@ -45,10 +47,9 @@ class Consumers(WebsocketConsumer):
 
         # 영상으로부터 사물 인식 결과를 프론트에 전송
         # 여기에 img_file 모델로 넘겨서 true or false 리턴하게 해주면 됨!
-
-
+        result = True
 
         self.send(text_data=json.dumps({
             'type': 'received value',
-            'message': "received!"
+            'message': result
         }))
