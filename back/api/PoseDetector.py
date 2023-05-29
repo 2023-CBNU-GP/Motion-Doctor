@@ -3,8 +3,8 @@ import cv2
 
 class PoseDetector() :
 
-    def __init__(self, mode=False,upper=False,
-                 smooth=True,detectionCon=0.5, trackCon=0.5):
+    def __init__(self, mode=False, model_complexity=1, smooth_landmarks=True,
+                 upper=False, smooth=True, detectionCon=0.5, trackCon=0.5):
 
         self.mode = mode
         self.smooth = smooth
@@ -12,10 +12,13 @@ class PoseDetector() :
         self.detectionCon = detectionCon
         self.trackCon = trackCon
 
+        self.model_complexity=model_complexity
+        self.smooth_landmarks=smooth_landmarks
+
         self.mpDraw = mp.solutions.drawing_utils
         self.mpPose = mp.solutions.pose
-        self.pose = self.mpPose.Pose(self.mode, self.upper,
-                                     self.smooth,self.detectionCon, self.trackCon)
+        self.pose = self.mpPose.Pose(self.mode, self.model_complexity, self.smooth_landmarks,
+                                     self.upper, self.smooth, self.detectionCon, self.trackCon)
 
     def findPose(self,img,draw=True):
         imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)

@@ -1,5 +1,6 @@
 import math
 import json
+import numpy as np
 
 class AngleManager():
 
@@ -23,7 +24,30 @@ class AngleManager():
             AngleSum[key]+= self.GetJointAngle(joints1[center],joints1[left],joints1[right])
             i+=1
 
-        return AngleSum
+    def GetAverageJoint(self,lmList,poselist):
+        # 각도 구하는 공식 다시 생각하기...
+
+        for i in range(len(lmList)):
+
+            id,x,y=lmList[i]
+
+            if id in poselist :
+                xx,yy=poselist[id]
+                poselist[id]=[xx+x,yy+y]
+
+
+
+    #cos 유사도는 각 벡터 사이의 유사도를 확인함...
+    #teacher의 x,y좌표와 환자의 x,y좌표에 대해 우사도를 해야하나..?
+    def GetSimiarityCos(self,TeacherJoint,PatientJoint):
+
+        for i in range(len(TeacherJoint)) :
+            dot_product=np.dot(TeacherJoint[i],PatientJoint[i])
+
+            l2_norm =(np.sqrt(sum(np.square(TeacherJoint[i])))*np.sqrt(sum(np.square(PatientJoint[i]))))
+            similarity = dot_product/l2_norm
+
+            print(similarity)
 
     def GetAngle(self,joints,AngleList):
 
@@ -58,16 +82,16 @@ class AngleManager():
         return scoreAngle
 
 
-    def TransferJsonFile(self,fileName,avgAngleList=None):
+    def TransferJsonFile(self,folderName,fileName,avgJointList=None,avgAngleList=None):
         #file 경로 지정
-        file_path="DoctorAngle.json"
+        file_path=folderName+"/DoctorAngle.json"
         #json파일이 없을시 예외발생, json파일 생성 후, 처음 들어온 데이터 저장. 이후 부터는 try문을 통해 예외발생 안함.
         try:
 
             with open(file_path) as json_file:
                 json_data=json.load(json_file)
 
-                dic=self.StoreAvgAngle(fileName,avgAngleList)
+                dic=self.StoreAvgAngle(fileName,avgJointList,avgAngleList)
 
                 json_data.update(dic)
                 print(json_data)
@@ -76,14 +100,15 @@ class AngleManager():
                     json.dump(json_data,make_file,indent='\t')
 
         except :
-            dic=self.StoreAvgAngle(fileName,avgAngleList)
+            dic=self.StoreAvgAngle(fileName,avgJointList,avgAngleList)
 
             with open(file_path,'w') as make_file :
                 json.dump(dic,make_file,indent='\t')
-
-    def StoreAvgAngle(self,fileName,avgAngleList):
+#poselist={11:[0,0],12:[0,0],13:[0,0],14:[0,0],15:[0,0],16:[0,0],23:[0,0],24:[0,0],25:[0,0],26:[0,0],27:[0,0],28:[0,0]}
+    def StoreAvgAngle(self,fileName,avgJointList,avgAngleList):
         dic={}
-        dic[fileName]={
+        dic[fileName]={'11':avgJointList[11],'12':avgJointList[12],'13':avgJointList[13],'14':avgJointList[14],'15':avgJointList[15],'16':avgJointList[16],'23':avgJointList[23],'24':avgJointList[24],'25':avgJointList[25],
+                       '26':avgJointList[26],'27':avgJointList[27],'28':avgJointList[28],
                     'LelbowAngle':avgAngleList['LelbowAngle'],'LshoulderAngle':avgAngleList['LshoulderAngle'],
                     'RelbowAngle':avgAngleList['RelbowAngle'],'RshoulderAngle':avgAngleList['RshoulderAngle'],
                     'Lhip':avgAngleList['Lhip'],'Rhip':avgAngleList['Rhip'],

@@ -9,6 +9,8 @@ COPY requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 
+RUN pip install opencv-python==4.1.2.30
+
 RUN apt-get update
 RUN apt-get -y install libgl1-mesa-glx
 

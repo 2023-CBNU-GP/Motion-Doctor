@@ -1,3 +1,4 @@
+import cv2
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
@@ -9,6 +10,9 @@ import string
 import jwt
 from . import serializers
 import json
+
+from .AngleManager import *
+from .PoseDetector import *
 
 
 # 의사가 파일 업로드하는 API 입니다!
@@ -42,7 +46,6 @@ class FileUpload(APIView):
             rand_str += str(random.choice(string.ascii_uppercase))
 
         for i in range(int(request.POST.get('num'))):
-            # CVmanager.doctorManage(file_data[i])
             form = Correctpic()
             form.picturefilename = file_data[i]
             form.exercisename = name_data[i]
@@ -50,9 +53,48 @@ class FileUpload(APIView):
             form.doctorid = doctor
             form.save()
 
-        # 동영상 정보 json으로 저장하는 거 여기에 넣어주세용
+            # 동영상 정보 json으로 저장하는 부분
+            while True:
+                cap = cv2.VideoCapture('media/' + str(form.picturefilename))
+                if cap.isOpened():
+                    print("생성되었습니다.")
+                    break
+            pTime = 0
+            detector = PoseDetector()
+            angleManager = AngleManager()
 
+            frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            DoctorAngle = {"LelbowAngle": 0, "LshoulderAngle": 0, "RelbowAngle": 0, "RshoulderAngle": 0,
+                           "Lhip": 0, "Rhip": 0, "Lknee": 0, "Rknee": 0}
 
+            poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
+                        25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
+
+            while True:
+                success, img = cap.read()
+
+                Curframe = cap.get(cv2.CAP_PROP_POS_FRAMES)
+
+                if Curframe >= frameCount / 3 and Curframe <= frameCount - frameCount / 3:  # 현재 프레임 수를 확인 후, 지정된 프레임 이상일 시 동영상에서 스켈렙톤 뽑아내기
+                    img = detector.findPose(img)
+                    lmList = detector.findPosition(img)
+                    # 사이각 구하기 공식
+                    angleManager.GetAngle(lmList, DoctorAngle)
+                    angleManager.GetAverageAngle(lmList, DoctorAngle)
+                    # cos유사도
+                    angleManager.GetAverageJoint(lmList, poselist)
+
+                if img is None:
+                    break
+
+            for id, value in poselist.items():
+                x = value[0]
+                y = value[1]
+
+                poselist[id] = [round(x / (frameCount / 3) % 360, 2), round(y / (frameCount / 3) % 360, 2)]
+
+            name_list = str(form.picturefilename).split('/')
+            angleManager.TransferJsonFile('media/'+name_list[0]+"/"+name_list[1], name_list[2], poselist, DoctorAngle)
 
         response = Response()
         response.data = {
@@ -62,6 +104,7 @@ class FileUpload(APIView):
         return response
 
 
+# 의사가 올린 파일 삭제하는 api
 class FileDelete(APIView):
     def post(self, request):
         body = json.loads(request.body.decode('utf-8'))
@@ -95,16 +138,21 @@ class PatientEvaluation(APIView):
         form = Patientpic()
         form.picturefilename = request.FILES.get('file_path')
 
-        # 여기가 모델로 파일을 넘겨서 점수 반환하는 부분입니다.
-        # CVmanager=om.OpencvManager()
-        # CVmanager.patientManage(form.picturefilename)
-        # request.FILES.get('file_path')를 모델로 넘겨서 점수 반환해서 아래 score 변수에 저장해주세욤
+        # 이 score는 image_socket에서 소켓 통신으로 수정 후 프론트로 반환될 예정입니다.
         score = 0
 
         form.score = score
-        form.correctpicid = Correctpic.objects.filter(exercisename=request.POST.get('name'), exercisetype=request.POST.get('type')).first()
+        correctPic = Correctpic.objects.filter(exercisename=request.POST.get('name'), exercisetype=request.POST.get('type')).first()
+        form.correctpicid = correctPic
         form.patientid = patient
         form.save()
+
+        # 환자가 영상을 찍으면 해당 의사와 매칭
+        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient) is None:
+            manage_form = Manage()
+            manage_form.doctorid = correctPic.doctorid
+            manage_form.patientid = patient
+            manage_form.save()
 
         response = Response()
         response.data = {
