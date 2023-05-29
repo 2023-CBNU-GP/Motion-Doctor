@@ -35,19 +35,18 @@ class AngleManager():
                 xx,yy=poselist[id]
                 poselist[id]=[xx+x,yy+y]
 
+    # cos 유사도는 각 벡터 사이의 유사도를 확인함...
+    # teacher의 x,y좌표와 환자의 x,y좌표에 대해 우사도를 해야하나..?
+    def GetSimiarityCos(self, TeacherJoint, PatientJoint):
+        poselist = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
 
+        for i in range(len(PatientJoint)):
+            dot_product = np.dot(TeacherJoint[str(poselist[i])], PatientJoint[poselist[i]])
+            l2_norm = (np.sqrt(sum(np.square(TeacherJoint[str(poselist[i])]))) * np.sqrt(
+                sum(np.square(PatientJoint[poselist[i]]))))
+            similarity = dot_product / l2_norm
 
-    #cos 유사도는 각 벡터 사이의 유사도를 확인함...
-    #teacher의 x,y좌표와 환자의 x,y좌표에 대해 우사도를 해야하나..?
-    def GetSimiarityCos(self,TeacherJoint,PatientJoint):
-
-        for i in range(len(TeacherJoint)) :
-            dot_product=np.dot(TeacherJoint[i],PatientJoint[i])
-
-            l2_norm =(np.sqrt(sum(np.square(TeacherJoint[i])))*np.sqrt(sum(np.square(PatientJoint[i]))))
-            similarity = dot_product/l2_norm
-
-            print(similarity)
+        return similarity
 
     def GetAngle(self,joints,AngleList):
 
@@ -62,13 +61,12 @@ class AngleManager():
 
         return AngleList
 
-    def ComparePose(self,TeacherAngle,PatientAngle) :
-        scoreAngle={}
+    def ComparePose(self,TeacherAngle,PatientAngle,scoreAngle):
 
-        for key,value in TeacherAngle.items():
-            angle=abs(float(value)-PatientAngle[key])
+        for key,value in scoreAngle.items():
+            angle=abs(TeacherAngle[key]-PatientAngle[key])
             if angle <= 10 :
-                scoreAngle[key]=100
+                 scoreAngle[key]=100
             elif angle <= 20 :
                 scoreAngle[key]=90
             elif angle <= 30 :
@@ -78,7 +76,6 @@ class AngleManager():
             else:
                 scoreAngle[key]=60
 
-        print(scoreAngle)
         return scoreAngle
 
 
@@ -117,10 +114,10 @@ class AngleManager():
 
         return dic
 
-    def GetAvgAngle(self,fileName):
-        file_path="DoctorAngle.json"
+    def GetAvgAngle(self,filePath,fileName):
+
         #json파일이 없을시 예외발생, json파일 생성 후, 처음 들어온 데이터 저장. 이후 부터는 try문을 통해 예외발생 안함.
-        with open(file_path) as json_file:
+        with open(filePath+"/DoctorAngle.json") as json_file:
             json_data=json.load(json_file)
 
         return json_data[fileName]
