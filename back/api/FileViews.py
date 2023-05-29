@@ -148,7 +148,7 @@ class PatientEvaluation(APIView):
         form.save()
 
         # 환자가 영상을 찍으면 해당 의사와 매칭
-        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient) is None:
+        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:
             manage_form = Manage()
             manage_form.doctorid = correctPic.doctorid
             manage_form.patientid = patient

@@ -6,6 +6,7 @@ import sys
 sys.path.append("..")
 from api.AngleManager import *
 from api.PoseDetector import *
+from api.models import *
 
 
 # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
@@ -20,8 +21,28 @@ class ScoreConsumers(WebsocketConsumer):
         # websocket 연결
         self.accept()
 
+        # 소켓에 연결되었음을 프론트에 알림
+        self.send(text_data=json.dumps({
+            'message': "socket connected"
+        }))
+
+    # websocket 연결이 해제되면 호출되는 메소드
+    def disconnect(self, close_code):
+        print("해제되었습니다.")
+
+        # 결과값을 프론트에 알림
+        self.send(text_data=json.dumps({
+            'message': "socket disconnected"
+        }))
+
+    def receive(self, text_data=None, bytes_data=None):
+        body = json.loads(text_data)
+
+        correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
+        patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
+
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
-        file_name = "media/doctor/13/JKZHFLNUPS.mp4" # 소켓으로 전달된 환자 파일
+        file_name = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
         cap = cv2.VideoCapture(file_name)
         pTime = 0
         detector = PoseDetector()
@@ -33,7 +54,8 @@ class ScoreConsumers(WebsocketConsumer):
             , "Lhip": 0, "Rhip": 0, "Lknee": 0, "Rknee": 0}
         angleManager = AngleManager()
 
-        teacherAngle = angleManager.GetAvgAngle("media/doctor/13/","JKZHFLNUPS.mp4") #의사 파일명
+        doctor_video_list = str(correctpic.picturefilename).split('/')
+        teacherAngle = angleManager.GetAvgAngle("media/"+doctor_video_list[0]+"/"+doctor_video_list[1], "JKZHFLNUPS.mp4")  # 의사 파일명
 
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
@@ -66,10 +88,6 @@ class ScoreConsumers(WebsocketConsumer):
 
         # 결과값을 프론트에 알림
         self.send(text_data=json.dumps({
-            'type': 'connection established',
-            'message': score
+            'type': 'return value',
+            'message': scoreAngle
         }))
-
-    # websocket 연결이 해제되면 호출되는 메소드
-    def disconnect(self, close_code):
-        print("해제되었습니다.")

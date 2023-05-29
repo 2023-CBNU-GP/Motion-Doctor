@@ -28,13 +28,17 @@ class ImageConsumers(WebsocketConsumer):
 
         # 소켓에 연결되었음을 프론트에 알림
         self.send(text_data=json.dumps({
-            'type': 'connection established',
-            'message': 'You are now connected!'
+            'message': "socket connected"
         }))
 
     # websocket 연결이 해제되면 호출되는 메소드
     def disconnect(self, close_code):
         print("해제되었습니다.")
+
+        # 결과값을 프론트에 알림
+        self.send(text_data=json.dumps({
+            'message': "socket disconnected"
+        }))
 
     # websocket으로 메시지 받으면 호출되는 메소드
     def receive(self, text_data=None, bytes_data=None):
