@@ -1,13 +1,24 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCookie } from "@md/utils/cookies";
+import axios from "@md/utils/axiosInstance";
+import { DoctorSign, PatientSign } from "@md/interfaces/user.interface";
 
 export default function Navigation() {
-    const [loginInfo, setLoginInfo] = useState();
+    const [isLogged, setIsLogged] = useState(getCookie('jwt'));
+    const [logInfo, setLogInfo] = useState<DoctorSign | PatientSign>();
 
-    // useEffect(() => {
-    //     const info = typeof window !== 'undefined' ? sessionStorage.getItem('md-user') : null;
-    //     setLoginInfo(info);
-    // }, []);
+    useEffect(() => {
+        if (isLogged) {
+            axios.get('/api/user').then((res) => {
+                setLogInfo(res.data);
+            });
+        }
+    }, [isLogged]);
+
+    const handleLogout = () => {
+        axios.post('/api/logout').then();
+    };
 
     return (
         <div
@@ -22,7 +33,9 @@ export default function Navigation() {
 
             <div>
                 {
-                    loginInfo ? <div>{loginInfo}</div> : <Link href="/">로그인</Link>
+                    logInfo ? <div className="flex gap-3">
+                        <div>{logInfo.name}</div>
+                        <Link href="/" onClick={handleLogout}>로그아웃</Link></div> : <Link href="/">로그인</Link>
                 }
             </div>
         </div>
