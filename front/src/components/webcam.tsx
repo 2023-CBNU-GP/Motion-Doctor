@@ -15,6 +15,7 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     const [idx, setIdx] = useState(1);
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
+    const [sendType, setSendType] = useState(false);
 
     // 옛날 영상 없애기
     const handleDataAvailable = useCallback(
@@ -68,23 +69,32 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
                 console.log(e);
             }
         }
-        handleSend();
-    }
-
-    const handleSend = () => {
-
         axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
             socket2.current = new WebSocket(process.env.NEXT_PUBLIC_SOCKET + "/ws/" + response.data.uid);
             socket2.current.onopen = () => {
-                console.log(typeData);
-                const data = {type: typeData} as object;
-                socket2.current.send(JSON.stringify(data));
-                socket2.current.onmessage = (data: string) => {
-                    console.log("socket2" + data);
-                }
+                console.log("연결");
+                setSendType(true);
             }
         });
     }
+
+    const handleSend = async () => {
+        console.log("work");
+        socket2.current.send(JSON.stringify({type: typeData}));
+        setSendType(false);
+    }
+
+    useEffect(() => {
+        if (sendType) {
+            handleSend().then(() => {
+                socket2.current.onmessage = (event: any) => {
+                    const json_data = JSON.parse(event.data);
+                    console.log("socket2: " + json_data.message);
+                }
+            });
+        }
+    }, [sendType]);
+
 
     // 촬영 종료된 영상이 있으면 서버에 전송
     useEffect(() => {
