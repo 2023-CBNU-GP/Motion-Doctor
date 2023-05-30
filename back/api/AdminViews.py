@@ -85,14 +85,22 @@ class ListDoctorVideo(APIView):
         exercise_type = body["type"]
 
         video_list = Correctpic.objects.filter(exercisetype=exercise_type).values()
-        doctor = Doctor.objects.filter(uid=video_list[0]['doctorid_id']).first()
+
+        doctor = Doctor()
+        if video_list is not None:
+            doctor = Doctor.objects.filter(uid=video_list[0]['doctorid_id']).first()
+
+        train_list, filepath_list = [], []
+        for video in video_list:
+            train_list.append(video['exercisename'])
+            filepath_list.append(video['picturefilename'])
 
         data = {
             "doctor_name": doctor.name,
             "doctor_hospitalName": doctor.hospitalname,
-            "courseName": video_list[0]['exercisetype'].split('-')[0],
-            "trainList": [video_list[0]['exercisename'], video_list[1]['exercisename']],
-            "filePathList": [video_list[0]['picturefilename'], video_list[1]['picturefilename']]
+            "courseName": exercise_type.split('-')[0],
+            "trainList": train_list,
+            "filePathList": filepath_list
         }
 
         return Response({'data': data})
