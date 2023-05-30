@@ -5,11 +5,12 @@ import FormData from "form-data";
 
 const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
 
-export default function WebCam({type}: { type: string }) {
+export default function WebCam({typeData, name}: { typeData: string, name: string }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>(null);
     const interval = useRef<any>();
     const socket = useRef<any>();
+    const socket2 = useRef<any>();
 
     const [idx, setIdx] = useState(1);
     const [capturing, setCapturing] = useState(false);
@@ -37,16 +38,14 @@ export default function WebCam({type}: { type: string }) {
             handleDataAvailable
         );
         mediaRecorderRef.current.start();
-
+        socket.current = new WebSocket(URL);
+        socket.current.onopen = () => {
+            console.log("연결 성공");
+        }
         interval.current = setInterval(() => {
             const pictureSrc = webcamRef.current.getScreenshot();
-            console.log(URL);
-            socket.current = new WebSocket(URL);
-
-            socket.current.onopen = () => {
-                console.log("연결 성공");
-                socket.current.send(pictureSrc);
-            }
+            console.log(pictureSrc);
+            socket.current.send(pictureSrc);
             socket.current.onmessage = (data: string) => {
                 console.log(data);
             }
@@ -58,11 +57,34 @@ export default function WebCam({type}: { type: string }) {
     const handleStopCaptureClick = useCallback(() => {
         mediaRecorderRef.current.stop();
         clearInterval(interval.current);
-        socket.current.onclose = () => {
-            console.log("연결 해제")
-        };
+        handleNewSocket().then();
         setCapturing(false);
     }, [mediaRecorderRef, setCapturing]);
+
+    const handleNewSocket = async () => {
+        await socket.current.close(1000);
+        socket.current.onclose = (e: any) => {
+            if (e.code === 1000) {
+                console.log(e);
+            }
+        }
+        handleSend();
+    }
+
+    const handleSend = () => {
+
+        axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
+            socket2.current = new WebSocket(process.env.NEXT_PUBLIC_SOCKET + "/ws/" + response.data.uid);
+            socket2.current.onopen = () => {
+                console.log(typeData);
+                const data = {type: typeData} as object;
+                socket2.current.send(JSON.stringify(data));
+                socket2.current.onmessage = (data: string) => {
+                    console.log("socket2" + data);
+                }
+            }
+        });
+    }
 
     // 촬영 종료된 영상이 있으면 서버에 전송
     useEffect(() => {
@@ -71,10 +93,10 @@ export default function WebCam({type}: { type: string }) {
                 type: "video/webm",
             });
             const formData = new FormData();
-            formData.append('name', "sholder_motion1");
+            formData.append('name', name);
+            formData.append('type', typeData);
             formData.append('file_path', blob);
-            console.log(formData);
-            axios.post("/api/evaluation", formData).then(r => console.log(r));
+            axios.post("/api/evaluation", formData).then();
             setRecordedChunks([]);
             setIdx(idx + 1);
         }

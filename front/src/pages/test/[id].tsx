@@ -82,13 +82,13 @@ export default function TestItem() {
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
-                        <WebCam type={type!}></WebCam>
+                        <WebCam typeData={type! as string} name={courseDetail?.trainList[tabIdx] as string}></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">
                     {courseDetail &&
                         <video controls
-                               src={process.env.NEXT_PUBLIC_API_KEY + '/media/' + courseDetail.filePathList[0]}
+                               src={process.env.NEXT_PUBLIC_API_KEY + '/media/' + courseDetail.filePathList[tabIdx]}
                                style={{width: "100%", height: "93%", background: 'black', cursor: 'pointer'}}
                                onClick={() => {
                                    setIsPause(!isPause);
