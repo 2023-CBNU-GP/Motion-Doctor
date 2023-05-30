@@ -1,5 +1,5 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import cv2
 
 import sys
@@ -13,31 +13,32 @@ from api.models import *
 # media 폴더에 있는 영상을 인공지능 모델에 연결시켜서 결과값을 리턴해야하는데
 # 이때 프론트에서 새롭게 연결한 웹소켓으로 결과값을 전송하는 것
 # 이 결과값을 전송하기 위한 Consumer
-class ScoreConsumers(WebsocketConsumer):
+class ScoreConsumers(AsyncWebsocketConsumer):
     # websocket에 연결되면 호출되는 메소드
-    def connect(self):
+    async def connect(self):
         print("웹소켓에 연결되었습니다.")
 
         # websocket 연결
-        self.accept()
+        await self.accept()
 
         # 소켓에 연결되었음을 프론트에 알림
-        self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps({
             'message': "socket connected"
         }))
 
     # websocket 연결이 해제되면 호출되는 메소드
-    def disconnect(self, close_code):
-        print("해제되었습니다.")
+    async def disconnect(self, close_code):
+        print("해제됩니다.")
+        if close_code == 1000:
+            await self.close()
 
-        # 결과값을 프론트에 알림
-        self.send(text_data=json.dumps({
-            'message': "socket disconnected"
-        }))
+    async def receive(self, text_data=None, bytes_data=None):
+        if text_data:
+            await self.handle_text_data(text_data)
 
-    def receive(self, text_data=None, bytes_data=None):
+
+    def handle_text_data(self, text_data):
         body = json.loads(text_data)
-
         correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
         patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
 
@@ -55,7 +56,7 @@ class ScoreConsumers(WebsocketConsumer):
         angleManager = AngleManager()
 
         doctor_video_list = str(correctpic.picturefilename).split('/')
-        teacherAngle = angleManager.GetAvgAngle("media/"+doctor_video_list[0]+"/"+doctor_video_list[1], "JKZHFLNUPS.mp4")  # 의사 파일명
+        teacherAngle = angleManager.GetAvgAngle("media/"+doctor_video_list[0]+"/"+doctor_video_list[1], "ANLBMHZZSE.mp4")  # 의사 파일명
 
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
