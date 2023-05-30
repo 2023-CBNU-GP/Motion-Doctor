@@ -35,12 +35,14 @@ class ScoreConsumers(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         if text_data:
             await self.handle_text_data(text_data)
+            # 결과값을 프론트에 알림
 
 
-    def handle_text_data(self, text_data):
+    async def handle_text_data(self, text_data):
+        print("work")
         body = json.loads(text_data)
         correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
-        patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
+        patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).first()
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
@@ -56,7 +58,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
         angleManager = AngleManager()
 
         doctor_video_list = str(correctpic.picturefilename).split('/')
-        teacherAngle = angleManager.GetAvgAngle("media/"+doctor_video_list[0]+"/"+doctor_video_list[1], "ANLBMHZZSE.mp4")  # 의사 파일명
+        teacherAngle = angleManager.GetAvgAngle("media/"+doctor_video_list[0]+"/"+doctor_video_list[1], doctor_video_list[2])  # 의사 파일명
 
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
@@ -87,8 +89,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
 
         score = 0
 
-        # 결과값을 프론트에 알림
-        self.send(text_data=json.dumps({
-            'type': 'return value',
-            'message': scoreAngle
-        }))
+        await self.send(text_data=json.dumps({
+                        'type': 'return value',
+                        'message': scoreAngle
+                        }))
