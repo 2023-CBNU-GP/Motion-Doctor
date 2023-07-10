@@ -32,6 +32,7 @@ export default function Navigation() {
                     logInfo?.type === "doctor" &&
                     <div className="flex gap-6 text-sm">
                         <Link className="hover:text-color-primary-500" href="/doctor/manage">내가 등록한 재활 코스</Link>
+                        <Link className="hover:text-color-primary-500" href="/doctor/upload">재활코스 등록하기</Link>
                         <Link className="hover:text-color-primary-500" href="/test">재활코스 구경하기</Link>
                     </div>
                 }

@@ -30,16 +30,17 @@ export default function Home() {
                         secure: true,
                         sameSite: 'none'
                     });
-                    sessionStorage.setItem("md-user", values.id);
-                    if (values.type === "patient") {
-                        router.push('/test');
-                    } else if (values.type === "doctor") {
-                        router.push('/doctor/manage');
-                    } else {
-                        router.push('/admin');
-                    }
-                    alert("로그인에 성공하셨습니다.");
 
+                    axios.get(process.env.NEXT_PUBLIC_API_KEY + '/api/user', {withCredentials: true}).then((values) => {
+                        if (values.data.type === "patient") {
+                            router.push('/test');
+                        } else if (values.data.type === "doctor") {
+                            router.push('/doctor/manage');
+                        } else {
+                            router.push('/approval');
+                        }
+                        alert("로그인에 성공하셨습니다.");
+                    });
                 }
             }).catch((error) => {
                 if (error.response.data.detail === "User not found!") {

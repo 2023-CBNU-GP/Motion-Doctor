@@ -4,18 +4,42 @@ import Navigation from "@md/components/navigation";
 import { useRef, useState } from "react";
 import { UploadItem } from "@md/interfaces/upload.interface";
 import Item from "@md/components/upload/item";
+import axiosClient from "@md/utils/axiosInstance";
 
 export default function Upload() {
     const [item, setItem] = useState({} as UploadItem);
     const [items, setItems] = useState<UploadItem[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const nextId = useRef(0);
+    const [tag, setTag] = useState("");
+
+    const submitCourse = () => {
+        const formData = new FormData();
+
+        items.map((item) => {
+            // const blob = new Blob(item.filePath!, {
+            //     type: "video",
+            // });
+
+            formData.append("file_path", item.file!);
+            formData.append("name", item.name!);
+            formData.append("tag", item.tag!);
+        });
+
+        formData.append("num", items.length.toString());
+
+        axiosClient.post('/api/file_upload', formData).then((response) => {
+            alert("등록되었습니다");
+        });
+    }
 
     const handleSubmit = () => {
         const data: UploadItem | any = {
             id: nextId.current,
             name: item.name as string,
-            filePath: inputRef.current?.value as string,
+            filePath: item.filePath,
+            file: item.file,
+            tag: tag
         };
         setItems(items.concat(data));
         nextId.current += 1;
@@ -23,13 +47,30 @@ export default function Upload() {
         inputRef.current!.value = "";
     };
 
+    const handleChange = (id: number, filePath: string, file: File, name: string) => {
+        console.log(filePath);
+        setItems(
+            items.map((item) => {
+                return item.id === id ? {...item, name: name, filePath: filePath, file: file,} : item;
+            })
+        );
+
+    };
+
     const handleRemove = (id: number) => {
         setItems(items.filter(idx => idx!.id !== id));
     }
 
     const handleInputChange = (e: any) => {
-        if (e.target.name === "filePath") setItem({...item, [e.target.name]: inputRef.current?.value});
-        else setItem({...item, [e.target.name]: e.target.value});
+        if (e.target.name === "filePath") {
+            setItem({
+                    ...item,
+                    ["file"]: e.target.files[0],
+                    [e.target.name]: e.target.value
+                }
+            );
+            // console.log(e.target.files[0]);
+        } else setItem({...item, [e.target.name]: e.target.value});
     };
 
 
@@ -44,30 +85,64 @@ export default function Upload() {
 
             <Navigation></Navigation>
             <Layout>
-                <div>자세 등록</div>
-                <div>의사번호</div>
+                <div className={`font-bold text-lg mb-6`}>자세 등록</div>
+                <div className={`flex p-4 bg-gray-50 items-center gap-4`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                         stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round"
+                              d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
+                    </svg>
 
-                <div>
+                    <input name={"tag"}
+                           type={"text"}
+                           value={tag}
+                           className={`w-full focus:outline-none bg-transparent`}
+                           onChange={(e) => setTag(e.target.value)}
+                           placeholder={`재활코스의 전체명을 정해주세요 ex) 허리재활운동코스`}
+                    />
+                </div>
+                <div className={`bg-gray-50 flex gap-4 px-3 items-center pb-2`}>
+                    <div className={`cursor-pointer`} onClick={handleSubmit}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1}
+                             stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                    </div>
+
                     <input name={"name"}
                            value={item.name}
                            type={"text"}
-                           onChange={handleInputChange}/>
+                           onChange={handleInputChange}
+                           placeholder={`운동명을 기입해주세요`}
+                           className={`w-[40%] bg-transparent focus:outline-none`}
+                    />
                     <input name={"filePath"}
                            type={"file"}
                            ref={inputRef}
-                           onChange={handleInputChange}/>
-                    <button onClick={handleSubmit}>등록하기</button>
+                           onChange={handleInputChange}
+                           className={`w-full text-slate-500 file:bg-color-primary-500 file:text-white file:border-0 file:rounded-xl file:font-semibold file:px-2.5 hover:file:bg-color-primary-400`}
+                    />
+                    <button className={`min-w-fit`}
+                            onClick={handleSubmit}>등록하기
+                    </button>
                 </div>
 
-                <div>
+                <div
+                    className={`${items.length !== 0 && "border-t-[0.5px] border-gray-300 bg-gray-50 flex-col gap-4 px-3 py-2 items-center"}`}>
                     {
                         items.map((idx) => {
-                            return <Item key={idx.id} {...idx} {...handleRemove}/>
+                            return <Item key={idx.id} itemData={idx}
+                                         handleChange={handleChange}
+                                         handleRemove={handleRemove}/>
                         })
                     }
                 </div>
-
-                <button>제출하기</button>
+                <div className={`flex justify-end`}>
+                    <button
+                        onClick={submitCourse}
+                        className={`mt-6 border border-slate-500 text-slate-500 hover:text-white hover:bg-slate-500 font-semibold rounded-2xl py-1 px-3`}>제출하기
+                    </button>
+                </div>
             </Layout>
         </div>
     );
