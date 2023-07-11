@@ -37,12 +37,11 @@ class ScoreConsumers(AsyncWebsocketConsumer):
             await self.handle_text_data(text_data)
             # 결과값을 프론트에 알림
 
-
     async def handle_text_data(self, text_data):
         print("work")
         body = json.loads(text_data)
         correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
-        patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).first()
+        patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).last()
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
@@ -51,6 +50,8 @@ class ScoreConsumers(AsyncWebsocketConsumer):
         detector = PoseDetector()
 
         frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        print(frameCount)
+
         patientAngle = {"LelbowAngle": 0, "LshoulderAngle": 0, "RelbowAngle": 0, "RshoulderAngle": 0
             , "Lhip": 0, "Rhip": 0, "Lknee": 0, "Rknee": 0}
         scoreAngle = {"LelbowAngle": 0, "LshoulderAngle": 0, "RelbowAngle": 0, "RshoulderAngle": 0
