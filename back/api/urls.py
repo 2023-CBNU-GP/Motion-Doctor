@@ -17,7 +17,7 @@ urlpatterns = [
   path('code_check', EmailViews.EmailCodeView.as_view()),
   path('file_upload', FileViews.FileUpload.as_view()),
   path('file_delete', FileViews.FileDelete.as_view()),
-  path('evaluation', FileViews.PatientEvaluation.as_view()),
+  # path('evaluation', FileViews.PatientEvaluation.as_view()),
   path('isapprove', AdminViews.ApproveRejectDoctor.as_view()),
   path('doctor_list', AdminViews.ListDoctor.as_view()),
   path('video_list', AdminViews.ListDoctorVideo.as_view()),
