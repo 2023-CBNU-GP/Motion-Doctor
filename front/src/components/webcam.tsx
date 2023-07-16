@@ -1,17 +1,21 @@
 import Webcam from "react-webcam";
 import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "@md/utils/axiosInstance";
-import FormData from "form-data";
 
 const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
+const VIDEO_URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/webcam';
 
 export default function WebCam({typeData, name}: { typeData: string, name: string }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>(null);
     const interval = useRef<any>();
-    const socket = useRef<any>();
-    const socket2 = useRef<any>();
 
+    const socketObDect = useRef<any>();
+    const socketScore = useRef<any>();
+    const socketVideo = useRef<any>();
+
+    const [base64Data, setBase64Data] = useState<any>(null);
+    const [sendVideo, setSendVideo] = useState(true);
     const [idx, setIdx] = useState(1);
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
@@ -30,24 +34,22 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     // 영상 촬영 시작 && object-detection 을 위한 10초 마다 이미지 전송
     const handleStartCaptureClick = useCallback(() => {
         setCapturing(true);
-        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-            mimeType: "video/webm",
-        });
+        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {mimeType: 'video/webm; codecs=vp9'});
 
         mediaRecorderRef.current.addEventListener(
             "dataavailable",
             handleDataAvailable
         );
         mediaRecorderRef.current.start();
-        socket.current = new WebSocket(URL);
-        socket.current.onopen = () => {
+
+        socketObDect.current = new WebSocket(URL);
+        socketObDect.current.onopen = () => {
             console.log("연결 성공");
         }
         interval.current = setInterval(() => {
             const pictureSrc = webcamRef.current.getScreenshot();
-            console.log(pictureSrc);
-            socket.current.send(pictureSrc);
-            socket.current.onmessage = (data: string) => {
+            socketObDect.current.send(pictureSrc);
+            socketObDect.current.onmessage = (data: string) => {
                 console.log(data);
             }
         }, 10000);
@@ -58,36 +60,76 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     const handleStopCaptureClick = useCallback(() => {
         mediaRecorderRef.current.stop();
         clearInterval(interval.current);
-        handleNewSocket().then();
+        handleVideoSocket().then(() => {
+        });
         setCapturing(false);
     }, [mediaRecorderRef, setCapturing]);
 
-    const handleNewSocket = async () => {
-        await socket.current.close(1000);
-        socket.current.onclose = (e: any) => {
+    const handleVideoSocket = async () => {
+        await socketObDect.current.close(1000);
+        socketObDect.current.onclose = (e: any) => {
             if (e.code === 1000) {
                 console.log(e);
             }
         }
-        axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
-            socket2.current = new WebSocket(process.env.NEXT_PUBLIC_SOCKET + "/ws/" + response.data.uid);
-            socket2.current.onopen = () => {
-                console.log("연결");
-                setSendType(true);
-            }
+
+        socketVideo.current = new WebSocket(VIDEO_URL);
+        socketVideo.current.onopen = () => {
+            console.log("연결");
+            setSendVideo(true);
+        }
+    }
+
+    const handleSendVideo = async () => {
+        await axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
+            socketVideo.current?.send(JSON.stringify({
+                patient_id: response.data.id as string,
+                exercise_name: name,
+                exercise_type: typeData,
+                video_data: base64Data,
+            }));
         });
+        setSendVideo(false);
+        // console.log(data);
+    }
+
+    useEffect(() => {
+        if (sendVideo) {
+            handleSendVideo().then(() => {
+                handleNewSocket().then();
+            });
+        }
+    }, [sendVideo]);
+
+    const handleNewSocket = async () => {
+        if (socketVideo.current !== undefined) {
+            await socketVideo.current?.close(1000);
+
+            socketVideo.current.onclose = (e: any) => {
+                if (e.code === 1000) {
+                    console.log(e);
+                }
+            }
+
+            axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
+                socketScore.current = new WebSocket(process.env.NEXT_PUBLIC_SOCKET + "/ws/" + response.data.uid);
+                socketScore.current.onopen = () => {
+                    console.log("연결");
+                    setSendType(true);
+                }
+            });
+        }
     }
 
     const handleSend = async () => {
-        console.log("work");
-        socket2.current.send(JSON.stringify({type: typeData}));
+        socketScore.current?.send(JSON.stringify({type: typeData}));
         setSendType(false);
     }
 
     useEffect(() => {
         if (sendType) {
             handleSend().then(() => {
-                socket2.current.onmessage = (event: any) => {
+                socketScore.current.onmessage = (event: any) => {
                     const json_data = JSON.parse(event.data);
                     console.log("socket2: " + json_data.message);
                 }
@@ -98,17 +140,23 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
 
     // 촬영 종료된 영상이 있으면 서버에 전송
     useEffect(() => {
-        if (recordedChunks.length) {
+        if (recordedChunks.length && mediaRecorderRef.current.state === "inactive") {
+            console.log(mediaRecorderRef.current.state);
+
             const blob = new Blob(recordedChunks, {
                 type: "video/webm",
             });
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('type', typeData);
-            formData.append('file_path', blob);
-            axios.post("/api/evaluation", formData).then();
-            setRecordedChunks([]);
-            setIdx(idx + 1);
+
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                const data = reader.result;
+                setBase64Data(data);
+                setRecordedChunks([]);
+                setIdx(idx + 1);
+            };
+
+            reader.readAsDataURL(blob);
         }
     }, [recordedChunks]);
 
