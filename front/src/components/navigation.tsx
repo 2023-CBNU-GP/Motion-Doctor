@@ -48,7 +48,7 @@ export default function Navigation() {
             <div>
                 {
                     logInfo ? <div className="flex gap-3">
-                        <div>{logInfo.name}</div>
+                        <Link className="hover:text-color-info-500" href="/mypage">{logInfo.name}</Link>
                         <Link href="/" onClick={handleLogout}>로그아웃</Link></div> : <Link href="/">로그인</Link>
                 }
             </div>

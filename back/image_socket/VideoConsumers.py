@@ -18,7 +18,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         # 임시파일 저장
         temp_path = tempfile.gettempdir()
-        with open(temp_path + '/video.mp4', 'wb') as wfile:
+        with open(temp_path + '/video.webm', 'wb') as wfile:
             wfile.write(binary_data)
 
         score = 0
@@ -26,7 +26,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         patient = Patient.objects.filter(id=patient_id).first()
 
         # 새로운 Patientpic 객체 생성 및 저장
-        with open(temp_path + '/video.mp4', "rb") as file:
+        with open(temp_path + '/video.webm', "rb") as file:
             form = Patientpic()
 
             file_obj = File(file)

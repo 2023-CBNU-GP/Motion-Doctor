@@ -32,7 +32,8 @@ export interface UserLogin {
 
 export interface DoctorInfo {
     _id: string,
+    id?: string,
     name: string,
     hospitalname?: string,
-    patientNum?: number,
+    patientNum?: string,
 }

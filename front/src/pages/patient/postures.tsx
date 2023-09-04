@@ -1,17 +1,19 @@
 import Head from "next/head";
 import Navigation from "@md/components/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "@md/components/layout";
-import axios from "axios";
 import { PostureInfo } from "@md/interfaces/posture.interface";
+import axiosClient from "@md/utils/axiosInstance";
 
-export async function getStaticProps() {
-    const resPostures = await axios("http://localhost:3000" + "/api/get-patient-postures");
-    const posturesData = resPostures.data;
-    return {props: {posturesData}};
-}
+export default function Postures() {
+    const [resPostures, setResPostures] = useState<PostureInfo[]>();
 
-export default function Postures({posturesData}: { posturesData: PostureInfo[] }) {
+    useEffect(() => {
+        axiosClient.get('/api/test_list').then(response => {
+            setResPostures(response.data.data);
+        });
+    }, []);
+
     return (
         <div>
             <Head>
@@ -37,7 +39,7 @@ export default function Postures({posturesData}: { posturesData: PostureInfo[] }
                         <div className="w-[15%] flex justify-center">피드백 결과</div>
                     </div>
                     {
-                        posturesData && posturesData!.map((data: PostureInfo, idx) => {
+                        resPostures && resPostures!.map((data: PostureInfo, idx) => {
                             return (
                                 <div key={idx}
                                      className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
@@ -46,7 +48,8 @@ export default function Postures({posturesData}: { posturesData: PostureInfo[] }
                                     <div className="w-[15%] flex justify-center">{data.trainNum}</div>
                                     <div className="w-[15%] flex justify-center">{data.doctorName}</div>
                                     <div className="w-[20%] flex justify-center">{data.hospitalName}</div>
-                                    <div className="w-[15%] flex justify-center">{data.counselResult}</div>
+                                    <div
+                                        className="w-[15%] flex justify-center">{data.counselResult ? data.counselResult.toString() : "0"}</div>
                                 </div>
                             );
                         })
