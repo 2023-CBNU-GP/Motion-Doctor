@@ -15,4 +15,3 @@ daphne
 opencv-python
 numpy
 mediapipe
-protobuf==3.20.*
