@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getCookie } from "@md/utils/cookies";
+import { getCookie, removeCookie } from "@md/utils/cookies";
 import axios from "@md/utils/axiosInstance";
 import { DoctorSign, PatientSign } from "@md/interfaces/user.interface";
 
@@ -12,12 +12,16 @@ export default function Navigation() {
         if (isLogged) {
             axios.get('/api/user').then((res) => {
                 setLogInfo(res.data);
+            }).catch((error) => {
+                removeCookie('jwt');
             });
         }
     }, [isLogged]);
 
     const handleLogout = () => {
-        axios.post('/api/logout').then();
+        axios.post('/api/logout').then((response) => {
+            removeCookie('jwt');
+        });
     };
 
     return (
