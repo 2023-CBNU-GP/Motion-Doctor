@@ -147,6 +147,16 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
                 type: "video/webm",
             });
 
+            const url = webkitURL.createObjectURL(blob);
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            // @ts-ignore
+            a.style = "display: none";
+            a.href = url;
+            a.download = "motion.webm";
+            a.click();
+            window.URL.revokeObjectURL(url);
+
             const reader = new FileReader();
 
             reader.onload = () => {
