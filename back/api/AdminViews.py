@@ -115,7 +115,7 @@ class DoctorPatientNum(APIView):
         manage_list = Manage.objects.filter(doctorid=doctor)
 
         data = {
-            "_id": 1,
+            "_id": doctor.uid,
             "name": doctor.name,
             "patientNum": len(manage_list),
         }

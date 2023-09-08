@@ -8,6 +8,8 @@ from api.models import *
 
 import tempfile
 from django.core.files import File
+from moviepy.editor import VideoFileClip
+import cv2
 
 
 # 환자 모션 웹캠 저장 및 점수 반환 consumer
@@ -64,6 +66,8 @@ class VideoConsumers(AsyncWebsocketConsumer):
         exercise_name = data['exercise_name']
         exercise_type = data['exercise_type']
         video_data = data['video_data']
+
+        video_data = video_data[23:]
 
         # 비디오 저장
         await self.save_video(patient_id, exercise_name, exercise_type, video_data)

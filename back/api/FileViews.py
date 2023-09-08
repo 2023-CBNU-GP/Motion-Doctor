@@ -1,3 +1,5 @@
+import shutil
+
 import cv2
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +15,8 @@ import json
 
 from .AngleManager import *
 from .PoseDetector import *
+
+import tempfile
 
 
 # 의사가 파일 업로드하는 API 입니다!
@@ -120,52 +124,72 @@ class FileDelete(APIView):
 
 
 # 환자 모션 웹캠 저장 및 점수 반환 API -> websocket으로 전환
-# class PatientEvaluation(APIView):
-#     def post(self, request):
-#         # 현재 로그인되어있는 patient 정보 받아오기
-#         token = request.COOKIES.get('jwt')
-#
-#         if not token:
-#             raise AuthenticationFailed("Unauthenticated!")
-#
-#         try:
-#             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-#         except jwt.ExpiredSignatureError:
-#             raise AuthenticationFailed("Unauthenticated!")
-#
-#         patient = Patient.objects.filter(id=payload['id']).first()
-#
-#         form = Patientpic()
-#
-#         # form.picturefilename = request.FILES.get('file_path')
-#         video = request.FILES.get('file_path')
-#
-#         # 동영상 데이터 저장
-#         with open("media/patient/9/jiu31589ddefd-어깨운동-CBYFOOVQEU.mp4", 'wb+') as destination:
-#             for chunk in video.chunks():
-#                 destination.write(chunk)
-#             form.picturefilename = destination
-#
-#         # 이 score는 image_socket에서 소켓 통신으로 수정 후 프론트로 반환될 예정입니다.
-#         score = 0
-#
-#         form.score = score
-#         correctPic = Correctpic.objects.filter(exercisename=request.POST.get('name'), exercisetype=request.POST.get('type')).first()
-#         form.correctpicid = correctPic
-#         form.patientid = patient
-#         form.save()
-#
-#         # 환자가 영상을 찍으면 해당 의사와 매칭
-#         if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:
-#             manage_form = Manage()
-#             manage_form.doctorid = correctPic.doctorid
-#             manage_form.patientid = patient
-#             manage_form.save()
-#
-#         response = Response()
-#         response.data = {
-#             'message': 'success',
-#             'score': score
-#         }
-#
-#         return response
+class PatientEvaluation(APIView):
+    def post(self, request):
+        # 현재 로그인되어있는 patient 정보 받아오기
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        patient = Patient.objects.filter(id=payload['id']).first()
+
+        form = Patientpic()
+
+        # 이 score는 image_socket에서 소켓 통신으로 수정 후 프론트로 반환될 예정입니다.
+        score = 0
+
+        chunk = request.FILES.get('chunk')
+        chunk_index, _ = chunk.name.split('_', 1)
+
+        # 조각을 임시로 저장하는 디렉토리 경로 설정
+        temp_directory = tempfile.gettempdir()
+
+        # 조각을 임시 디렉토리에 저장
+        with open(os.path.join(temp_directory, chunk.name), 'wb') as f:
+            for chunk_data in chunk.chunks():
+                f.write(chunk_data)
+
+        # 모든 조각을 받았는지 확인
+        total_chunks = request.POST.get('total_chunks')
+        uploaded_chunks = len(os.listdir(temp_directory))
+        if uploaded_chunks == total_chunks:
+            # 모든 조각을 받았으므로 조각들을 하나의 파일로 조립
+            output_filename = 'video.mp4'
+            with open(output_filename, 'wb') as f:
+                for i in range(uploaded_chunks):
+                    chunk_filename = os.path.join(temp_directory, f'{i}_{chunk.name}')
+                    with open(chunk_filename, 'rb') as chunk_file:
+                        f.write(chunk_file.read())
+
+            # 조립된 파일을 원하는 곳에 저장하거나 추가 처리
+            form.picturefilename = output_filename
+            form.score = score
+            correctPic = Correctpic.objects.filter(exercisename=request.POST.get('name'),
+                                                   exercisetype=request.POST.get('type')).first()
+            form.correctpicid = correctPic
+            form.patientid = patient
+            form.save()
+
+            # 임시 디렉토리 삭제
+            shutil.rmtree(temp_directory)
+
+        # 환자가 영상을 찍으면 해당 의사와 매칭
+        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:
+            manage_form = Manage()
+            manage_form.doctorid = correctPic.doctorid
+            manage_form.patientid = patient
+            manage_form.save()
+
+        response = Response()
+        response.data = {
+            'message': 'success',
+            'score': score
+        }
+
+        return response

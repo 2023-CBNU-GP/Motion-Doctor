@@ -173,7 +173,7 @@ class PatientTestList(APIView):
             scoreList.append(patientpic.score)
 
         data = {
-            "_id": 1,
+            "_id": patient.uid,
             "patientName": patient.name,
             "trainTitle": type.split('-')[0],
             "trainList": name,
