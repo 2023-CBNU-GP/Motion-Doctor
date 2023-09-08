@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { UploadItem } from "@md/interfaces/upload.interface";
 import Item from "@md/components/upload/item";
 import axiosClient from "@md/utils/axiosInstance";
+import { router } from "next/client";
 
 export default function Upload() {
     const [item, setItem] = useState({} as UploadItem);
@@ -30,6 +31,7 @@ export default function Upload() {
 
         axiosClient.post('/api/file_upload', formData).then((response) => {
             alert("등록되었습니다");
+            router.push("/doctor/manage");
         });
     }
 

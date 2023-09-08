@@ -4,23 +4,24 @@ import Navigation from "@md/components/navigation";
 import { ManagePatients, RegisterTrain } from "@md/interfaces/manage.interface";
 import { DoctorInfo } from "@md/interfaces/user.interface";
 import Profile from "@md/components/profile";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ManageItem from "@md/components/manageItem";
+import axiosClient from "@md/utils/axiosInstance";
 
 export async function getStaticProps() {
     const resManages = await fetch("http://localhost:3000" + "/api/get-manages");
     const manageData = await resManages.json();
 
-    const resPatientNum = await fetch("http://localhost:3000" + "/api/get-doctor-patient-num");
-    const patientNumData = await resPatientNum.json();
+    // const resPatientNum = await fetch("http://localhost:3000" + "/api/get-doctor-patient-num");
+    // const patientNumData = await resPatientNum.json();
 
     const resRegisterTrain = await fetch("http://localhost:3000" + "/api/get-train-list");
     const registerTrainData = await resRegisterTrain.json();
 
-    const resDoctor = await fetch("http://localhost:3000" + "/api/get-doctor");
-    const doctorData = await resDoctor.json();
+    // const resDoctor = await fetch("http://localhost:3000" + "/api/get-doctor");
+    // const doctorData = await resDoctor.json();
 
-    return {props: {manageData, doctorData, patientNumData, registerTrainData}};
+    return {props: {manageData, registerTrainData}};
 }
 
 // 의사가 진료하는 환자들을 확인할 수 있는 페이지
@@ -31,6 +32,43 @@ export default function Manage({manageData, doctorData, patientNumData, register
     registerTrainData: RegisterTrain[] | null,
 }) {
     const [tabIdx, setTabIdx] = useState(0);
+
+    const [loading, setLoading] = useState(false);
+    const [info, setInfo] = useState<DoctorInfo>();
+    const [resPatientNum, setResPatientNum] = useState<DoctorInfo>();
+    const [resRegisterTrain, setResRegisterTrain] = useState<RegisterTrain[]>();
+
+    useEffect(() => {
+        axiosClient.get('/api/user').then(response => {
+            setInfo({
+                _id: response.data._id,
+                id: response.data.id,
+                name: response.data.name,
+                hospitalname: response.data.hospitalname,
+            });
+            setLoading(!loading);
+        })
+    }, []);
+
+    useEffect(() => {
+        if (info) {
+            axiosClient.post('/api/manage_list', {id: info?.id}).then(response => {
+                setResPatientNum({
+                    _id: response.data.data._id,
+                    name: response.data.data.name,
+                    patientNum: response.data.data.patientNum?.toString(),
+                });
+                console.log(response.data.data.patientNum?.toString());
+            });
+        }
+    }, [loading]);
+
+    useEffect(() => {
+        axiosClient.get('/api/patient_list').then(response => {
+        });
+
+    }, []);
+
     return (
         <div>
             <Head>
@@ -43,8 +81,8 @@ export default function Manage({manageData, doctorData, patientNumData, register
 
             {
                 tabIdx === 0 ?
-                    <Profile doctorData={doctorData} patientNumData={null} registerTrain={registerTrainData}/> :
-                    <Profile doctorData={doctorData} patientNumData={patientNumData} registerTrain={null}/>
+                    <Profile doctorData={info!} patientNumData={null} registerTrain={registerTrainData}/> :
+                    <Profile doctorData={info!} patientNumData={resPatientNum!} registerTrain={null}/>
             }
 
             <Layout>

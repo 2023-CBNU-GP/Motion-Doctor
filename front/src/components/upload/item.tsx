@@ -7,7 +7,7 @@ export default function Item({itemData, handleChange, handleRemove}: {
     handleRemove: any
 }) {
     const [isModified, setIsModified] = useState(false);
-    const [item, setItem] = useState<UploadItem>(itemData);
+    const [item, setItem] = useState<UploadItem>(itemData!);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const handleInputChange = (e: any) => {

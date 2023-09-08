@@ -14,19 +14,19 @@ export default function Profile({doctorData, patientNumData, registerTrain}: {
             <div className="pl-8">
                 <div className="font-bold">
                     <a href={'/doctor'}
-                       className="text-xl hover:text-color-primary-500 hover:border-b-2 border-color-primary-500">{doctorData.name}님</a> 반갑습니다!
+                       className="text-xl hover:text-color-primary-500 hover:border-b-2 border-color-primary-500">{doctorData?.name}님</a> 반갑습니다!
                 </div>
                 <div className="flex gap-3">
-                    <div>병원명: <label className="text-color-info-600 font-bold">{doctorData.hospitalname}</label>
+                    <div>병원명: <label className="text-color-info-600 font-bold">{doctorData?.hospitalname}</label>
                     </div>
                     {
                         patientNumData && <div>담당 환자 수: <label
-                            className="text-color-info-600 font-bold">{patientNumData.patientNum}</label>명
+                            className="text-color-info-600 font-bold">{patientNumData?.patientNum}</label>명
                         </div>
                     }
                     {
                         registerTrain && <div>등록 재활 운동 코스 수: <label
-                            className="text-color-info-600 font-bold">{registerTrain.length}</label>개
+                            className="text-color-info-600 font-bold">{registerTrain?.length}</label>개
                         </div>
                     }
                 </div>

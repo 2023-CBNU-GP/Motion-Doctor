@@ -1,5 +1,5 @@
 export interface PostureInfo {
-    _id: string,
+    _id?: string,
     hospitalName: string,
     doctorName: string,
     trainTitle: string,

@@ -4,8 +4,8 @@ import Navigation from "@md/components/navigation";
 import Item from "@md/components/upload/item";
 import { useRef, useState } from "react";
 import FormData from "form-data";
-import axios from "axios";
 import { UploadItem } from "@md/interfaces/upload.interface";
+import axiosClient from "@md/utils/axiosInstance";
 
 export default function Upload() {
     const [item, setItem] = useState({} as UploadItem);
@@ -15,10 +15,18 @@ export default function Upload() {
 
     const submitVideo = () => {
         const formData = new FormData();
-        formData.append('name', items[0]?.name);
-        formData.append('file_path', items[0]?.file);
 
-        axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/evaluation', formData, {withCredentials: true}).then((response) => {
+        items.map((item) => {
+            // const blob = new Blob(item.filePath!, {
+            //     type: "video",
+            // });
+            formData.append("name", item.name!);
+            formData.append("file_path", item.file!);
+        });
+
+        formData.append("num", items.length.toString());
+
+        axiosClient.post('/api/file_upload', formData).then((response) => {
             if (response.status === 200) {
                 alert("자세등록을 완료하였습니다");
             }
@@ -29,13 +37,12 @@ export default function Upload() {
         const data: UploadItem = {
             id: nextId.current,
             name: "어깨운동",
-            filePath: inputRef.current?.value,
-            file: item.filePath,
+            filePath: item.filePath,
+            file: item.file,
         };
         setItems([data]);
         nextId.current += 1;
         console.log(items);
-
         setItem({name: "", filePath: ""});
         inputRef.current!.value = "";
     };
@@ -45,7 +52,13 @@ export default function Upload() {
     }
 
     const handleInputChange = (e: any) => {
-        if (e.target.name === "filePath") setItem({...item, [e.target.name]: e.target.files[0]});
+        if (e.target.name === "filePath")
+            setItem({
+                    ...item,
+                    ["file"]: e.target.files[0],
+                    [e.target.name]: e.target.value
+                }
+            );
         else setItem({...item, [e.target.name]: e.target.value});
     };
 
@@ -82,7 +95,9 @@ export default function Upload() {
                     <div>
                         {
                             items.map((idx) => {
-                                return <Item key={idx.id} {...idx} {...handleRemove}/>
+                                return <Item key={idx.id} itemData={idx}
+                                             handleChange={undefined}
+                                             handleRemove={handleRemove}/>
                             })
                         }
                     </div>

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.2",
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^4.4.0",
     "@types/node": "18.15.5",

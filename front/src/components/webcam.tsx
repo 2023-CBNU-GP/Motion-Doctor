@@ -34,7 +34,7 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     // 영상 촬영 시작 && object-detection 을 위한 10초 마다 이미지 전송
     const handleStartCaptureClick = useCallback(() => {
         setCapturing(true);
-        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {mimeType: 'video/webm; codecs=vp9'});
+        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {mimeType: 'video/webm;'});
 
         mediaRecorderRef.current.addEventListener(
             "dataavailable",
@@ -146,6 +146,16 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
             const blob = new Blob(recordedChunks, {
                 type: "video/webm",
             });
+
+            const url = webkitURL.createObjectURL(blob);
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            // @ts-ignore
+            a.style = "display: none";
+            a.href = url;
+            a.download = "motion.webm";
+            a.click();
+            window.URL.revokeObjectURL(url);
 
             const reader = new FileReader();
 
