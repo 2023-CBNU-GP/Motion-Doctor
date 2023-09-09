@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .models import *
 import json
-
+from django.db.models import Avg
 
 # 의사가 comment를 부여하기 위한 api
 # DB 수정!
@@ -106,6 +106,7 @@ class DoctorPatientList(APIView):
 
         patient = Patient.objects.filter(id=payload["id"]).first()
 
+        # 환자 영상 모두 가져오기
         patientpic_list = Patientpic.objects.filter(patientid=patient)
         type_dict = {}
         type_list = []
@@ -182,3 +183,40 @@ class PatientTestList(APIView):
         }
 
         return Response({'data': data})
+
+
+# 특정 의사가 본인이 올린 전체 영상 확인하는 API
+class DoctorVideo(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        doctor = Doctor.objects.filter(id=payload["id"]).first()
+        video_list = Correctpic.objects.filter(doctorid=doctor.uid)
+
+        type_dict = {}
+        for video in video_list:
+            if type_dict.get(video.exercisetype) is None:
+                type_dict[video.exercisetype] = 1
+            else:
+                type_dict[video.exercisetype] += 1
+
+        type_list = list(type_dict.keys())
+
+        data_list = []
+        for i in range(len(type_dict)):
+            data = {
+                "_id": i+1,
+                "type": type_list[i].split('-')[0],
+                "num": type_dict[type_list[i]]
+            }
+            data_list.append(data)
+
+        return Response({'data': data_list})
