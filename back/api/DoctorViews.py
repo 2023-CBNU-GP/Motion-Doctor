@@ -8,7 +8,6 @@ import json
 from django.db.models import Avg
 
 # 의사가 comment를 부여하기 위한 api
-# DB 수정!
 class DoctorComment(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
@@ -24,16 +23,19 @@ class DoctorComment(APIView):
 
         doctor = Doctor.objects.filter(id=payload["id"]).first()
 
-        # 여기서 pictureId는 patientPic을 가리키도록 되어 있는데
-        # 하나의 exerciseType(큰 운동)에 여러 개의 exerciseName이 있고, 각 exerciseName마다 patientPic이 존재.
-        # 따라서 DB에 논리적인 오류가 있는 듯함. 일단은 여러 개의 exerciseName마다 comment를 만들었다. 나중에 수정예정.
-        correctpic_list = Correctpic.objects.filter(exercisetype=body['type'])
-        for correctpic in correctpic_list:
-            comment = Doctorcomment()
-            comment.text = body["text"]
-            comment.doctorid = doctor
-            comment.pictureid = Patientpic.objects.filter(correctpicid=correctpic).first()
-            comment.save()
+        comment = Doctorcomment()
+        comment.text = body["text"]
+        comment.doctorid = doctor
+
+        correctpic = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
+        patientpic_list = Patientpic.objects.filter(correctpicid=correctpic)
+
+        for patientpic in patientpic_list:
+            file_name = str(patientpic.picturefilename).split('/')[2].split('-')[2]
+            if file_name[:10] == body['idx']:
+                comment.pictureid = patientpic
+                break
+        comment.save()
 
         response = Response()
         response.data = {
@@ -44,7 +46,6 @@ class DoctorComment(APIView):
 
 
 # 특정 의사가 본인의 재활 코스를 수강한 환자 목록 리턴하는 api
-# DB 수정!
 class ManagePatientList(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
@@ -108,25 +109,35 @@ class PatientTestList(APIView):
         patient = Patient.objects.filter(uid=uid).first()
         correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
 
-        name, videoList, scoreList = [], [], []
-        type=''
+        i=0
+        data_list=[]
         for correctpic in correctpic_list:
-            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).first()
+            videoList, scoreList = [], []
+            name, type = '', ''
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid, patientid=patient.uid)
+
+            if not patientpic.exists():
+                break
+
+            for pic in patientpic:
+                videoList.append(str(pic.picturefilename))
+                scoreList.append(pic.score)
+
             type = correctpic.exercisetype
-            name.append(correctpic.exercisename)
-            videoList.append(str(patientpic.picturefilename))
-            scoreList.append(patientpic.score)
+            name=correctpic.exercisename
 
-        data = {
-            "_id": patient.uid,
-            "patientName": patient.name,
-            "trainTitle": type.split('-')[0],
-            "trainList": name,
-            "videoList": videoList,
-            "scoreList": scoreList
-        }
+            data = {
+                "_id": i+1,
+                "patientName": patient.name,
+                "trainTitle": type.split('-')[0],
+                "trainList": name,
+                "videoList": videoList,
+                "scoreList": scoreList
+            }
+            data_list.append(data)
+            i+=1
 
-        return Response({'data': data})
+        return Response({'data': data_list})
 
 
 # 특정 의사가 본인이 올린 전체 영상 확인하는 API
