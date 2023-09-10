@@ -20,7 +20,7 @@ def patient_file_path(instance, filename):
     for i in range(n):
         rand_str += str(random.choice(string.ascii_uppercase))
 
-    return f"patient/{instance.patientid.uid}/{instance.patientid.id+'-'+instance.correctpicid.exercisename+'-'+rand_str}.webm"
+    return f"patient/{instance.patientid.uid}/{instance.patientid.id+'-'+instance.correctpicid.exercisename+'-'+rand_str}.mp4"
 
 
 class Correctpic(models.Model):

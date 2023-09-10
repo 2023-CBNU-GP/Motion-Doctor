@@ -144,7 +144,7 @@ class PatientTestList(APIView):
                 "_id": i+1,
                 "patientName": patient.name,
                 "trainTitle": type.split('-')[0],
-                "trainList": name,
+                "trainName": name,
                 "videoList": videoList,
                 "scoreList": scoreList
             }

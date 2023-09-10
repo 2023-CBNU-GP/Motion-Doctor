@@ -78,7 +78,7 @@ class DoctorPatientList(APIView):
         return Response({'data': data_list})
 
 
-# 환자가 자신이 등록한 비디오 삭제하는 API
+# 환자가 자신이 등록한 비디오 삭제하는 API - 구현해야함
 class RemoveVideo(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
