@@ -20,15 +20,25 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         # 임시파일 저장
         temp_path = tempfile.gettempdir()
-        with open(temp_path + '/video.webm', 'wb') as wfile:
+        with open(temp_path + '/video.mp4', 'wb') as wfile:
             wfile.write(binary_data)
 
+        # while True:
+        #     if os.path.exists('media/' + 'video.webm'):
+        #         print("파일이 생성되었습니다.")
+        #         break
+
+        # os.chdir('/usr/src/app/media')
+        # print(os.getcwd())
+        # subprocess.call("ffmpeg -i video.webm video.mp4")
+        #
+        # os.chdir('/usr/src/app/')
         score = 0
         correctPic = Correctpic.objects.filter(exercisename=exercise_name, exercisetype=exercise_type).first()
         patient = Patient.objects.filter(id=patient_id).first()
 
         # 새로운 Patientpic 객체 생성 및 저장
-        with open(temp_path + '/video.webm', "rb") as file:
+        with open(temp_path + '/video.mp4', "rb") as file:
             form = Patientpic()
 
             file_obj = File(file)
@@ -38,6 +48,13 @@ class VideoConsumers(AsyncWebsocketConsumer):
             form.patientid = patient
 
             form.save()
+
+        # 환자가 영상을 찍으면 해당 의사와 매칭
+        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:
+            manage_form = Manage()
+            manage_form.doctorid = correctPic.doctorid
+            manage_form.patientid = patient
+            manage_form.save()
 
     async def connect(self):
         # 웹소켓 연결이 이루어질 때 실행되는 메서드

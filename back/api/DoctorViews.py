@@ -72,19 +72,32 @@ class ManagePatientList(APIView):
         for manage in manage_list:
             patient = Patient.objects.filter(uid=manage.patientid.uid).first()
             patientpic_list = Patientpic.objects.filter(patientid=manage.patientid)
+
+            type_dict = {}
             for patientpic in patientpic_list:
                 correctpic = Correctpic.objects.filter(uid=patientpic.correctpicid.uid).first()
-                type = correctpic.exercisetype
-                comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
-                if comment is None:
-                    isCounseled = False
+
+                if type_dict.get(correctpic.exercisetype) is None:
+                    type_dict[correctpic.exercisetype] = 1
                 else:
-                    isCounseled = True
+                    type_dict[correctpic.exercisetype] += 1
+
+            type_list = list(type_dict.keys())
+
+            k=0
+            for j in range(len(type_dict)):
+                isCounseled = True
+                for _ in range(type_dict[type_list[j]]):
+                    comment = Doctorcomment.objects.filter(pictureid=patientpic_list[k].uid).first()
+                    if comment is None:
+                        isCounseled = False
+                    k+=1
 
                 data = {
                     "_id": i,
+                    "uid": patient.uid,
                     "patientName": patient.name,
-                    "trainCourse": type.split('-')[0],
+                    "trainCourse": type_list[j].split('-')[0],
                     "isCounseled": isCounseled
                 }
                 data_list.append(data)
