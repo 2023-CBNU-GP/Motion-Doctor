@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .models import *
 import json
-from django.db.models import Avg
+
 
 # 의사가 comment를 부여하기 위한 api
 class DoctorComment(APIView):
@@ -27,14 +27,19 @@ class DoctorComment(APIView):
         comment.text = body["text"]
         comment.doctorid = doctor
 
-        correctpic = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
-        patientpic_list = Patientpic.objects.filter(correctpicid=correctpic)
+        # 환자 영상 링크 전체를 보내줄 때
+        comment.pictureid = Patientpic.objects.filter(picturefilename=body['video']).first()
 
-        for patientpic in patientpic_list:
-            file_name = str(patientpic.picturefilename).split('/')[2].split('-')[2]
-            if file_name[:10] == body['idx']:
-                comment.pictureid = patientpic
-                break
+        # 재활코스 타입과 이름으로 보내줄 때
+        #correctpic = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
+        #patientpic_list = Patientpic.objects.filter(correctpicid=correctpic)
+
+        #for patientpic in patientpic_list:
+        #    file_name = str(patientpic.picturefilename).split('/')[2].split('-')[2]
+        #    if file_name[:10] == body['idx']:
+        #        comment.pictureid = patientpic
+        #        break
+
         comment.save()
 
         response = Response()
@@ -64,10 +69,6 @@ class ManagePatientList(APIView):
 
         i = 1
         data_list = []
-
-        # 여기도 DB 수정 필요
-        # PatientPic에 exerciseType 추가하는 것이 좋아보임.
-        # 원래 같은 Type은 하나로 표시되어야하는데, 일단 다 표시되도록 하였음.
         for manage in manage_list:
             patient = Patient.objects.filter(uid=manage.patientid.uid).first()
             patientpic_list = Patientpic.objects.filter(patientid=manage.patientid)
@@ -157,19 +158,29 @@ class DoctorVideo(APIView):
         video_list = Correctpic.objects.filter(doctorid=doctor.uid)
 
         type_dict = {}
+        name_list = []
         for video in video_list:
             if type_dict.get(video.exercisetype) is None:
                 type_dict[video.exercisetype] = 1
             else:
                 type_dict[video.exercisetype] += 1
 
+            name_list.append(video.exercisename)
+
         type_list = list(type_dict.keys())
 
         data_list = []
+        j=0
         for i in range(len(type_dict)):
+            num = []
+            for _ in range(type_dict[type_list[i]]):
+                num.append(name_list[j])
+                j += 1
+
             data = {
                 "_id": i+1,
-                "type": type_list[i].split('-')[0],
+                "type": type_list[i],
+                "name": num,
                 "num": type_dict[type_list[i]]
             }
             data_list.append(data)
