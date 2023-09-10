@@ -15,3 +15,5 @@ daphne
 opencv-python
 numpy
 mediapipe
+moviepy
+pydub

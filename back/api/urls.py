@@ -3,6 +3,7 @@ from . import EmailViews
 from . import FileViews
 from . import AdminViews
 from . import DoctorViews
+from . import PatientViews
 from django.urls import path
 
 urlpatterns = [
@@ -24,7 +25,8 @@ urlpatterns = [
   path('manage_list', AdminViews.DoctorPatientNum.as_view()),
   path('comment', DoctorViews.DoctorComment.as_view()),
   path('patient_list', DoctorViews.ManagePatientList.as_view()),
-  path('test_list', DoctorViews.DoctorPatientList.as_view()),
+  path('test_list', PatientViews.DoctorPatientList.as_view()),
   path('manage/<int:uid>', DoctorViews.PatientTestList.as_view()),
-  path('register_video', DoctorViews.DoctorVideo.as_view())
+  path('register_video', DoctorViews.DoctorVideo.as_view()),
+  path('remove_video', PatientViews.RemoveVideo.as_view())
 ]

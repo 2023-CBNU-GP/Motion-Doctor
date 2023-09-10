@@ -112,7 +112,11 @@ class FileUpload(APIView):
 class FileDelete(APIView):
     def post(self, request):
         body = json.loads(request.body.decode('utf-8'))
-        data = Correctpic.objects.filter(exercisename=body['name']).first()
+        data = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
+
+        if Patientpic.objects.filter(correctpicid=data.uid).first() is not None:
+            raise AuthenticationFailed("파일을 삭제할 수 없습니다.")
+
         data.delete()
 
         response = Response()
