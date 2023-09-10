@@ -78,7 +78,7 @@ export default function Manage({manageData, registerTrainData}: {
 
             {
                 tabIdx === 0 ?
-                    <Profile doctorData={info!} patientNumData={null} registerTrain={registerTrainData}/> :
+                    <Profile doctorData={info!} patientNumData={null} registerTrain={resRegisterTrain!}/> :
                     <Profile doctorData={info!} patientNumData={resPatientNum!} registerTrain={null}/>
             }
 
