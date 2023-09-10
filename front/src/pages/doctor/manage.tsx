@@ -12,20 +12,14 @@ export async function getStaticProps() {
     const resManages = await fetch("http://localhost:3000" + "/api/get-manages");
     const manageData = await resManages.json();
 
-    // const resPatientNum = await fetch("http://localhost:3000" + "/api/get-doctor-patient-num");
-    // const patientNumData = await resPatientNum.json();
-
     const resRegisterTrain = await fetch("http://localhost:3000" + "/api/get-train-list");
     const registerTrainData = await resRegisterTrain.json();
-
-    // const resDoctor = await fetch("http://localhost:3000" + "/api/get-doctor");
-    // const doctorData = await resDoctor.json();
 
     return {props: {manageData, registerTrainData}};
 }
 
 // 의사가 진료하는 환자들을 확인할 수 있는 페이지
-export default function Manage({manageData, doctorData, patientNumData, registerTrainData}: {
+export default function Manage({manageData, registerTrainData}: {
     manageData: ManagePatients[] | null,
     doctorData: DoctorInfo,
     patientNumData: DoctorInfo,
@@ -64,7 +58,10 @@ export default function Manage({manageData, doctorData, patientNumData, register
     }, [loading]);
 
     useEffect(() => {
-        axiosClient.get('/api/patient_list').then(response => {
+        axiosClient.get('/api/register_video').then(response => {
+            setResRegisterTrain(response.data.data.map((item: any) => {
+                return {_id: item._id, trainTitle: item.type, trainListLen: item.num};
+            }));
         });
 
     }, []);
@@ -98,7 +95,7 @@ export default function Manage({manageData, doctorData, patientNumData, register
                 </div>
 
                 {
-                    tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={registerTrainData}/> :
+                    tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={resRegisterTrain!}/> :
                         <ManageItem manageData={manageData} registerTrainData={null}/>
                 }
             </Layout>

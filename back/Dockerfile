@@ -9,12 +9,13 @@ COPY requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 
-RUN pip install opencv-python==4.1.2.30
+RUN pip install opencv-python
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get install -y ffmpeg
 
+# RUN apt-get update
 RUN apt-get -y install libgl1-mesa-glx
 
 WORKDIR /usr/src/app

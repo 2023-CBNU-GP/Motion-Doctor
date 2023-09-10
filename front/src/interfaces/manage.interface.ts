@@ -17,7 +17,7 @@ export interface ManagePatientDetail {
 
 export interface RegisterTrain {
     _id: string,
-    doctorName: string,
+    doctorName?: string,
     trainTitle: string,
     trainListLen: number,
 }

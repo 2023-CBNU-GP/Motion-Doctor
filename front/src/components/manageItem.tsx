@@ -29,7 +29,7 @@ export default function ManageItem({manageData, registerTrainData}: {
                                 </div>
                             </Link>
                         );
-                    }) : registerTrainData!.map((data: RegisterTrain, idx) => {
+                    }) : registerTrainData?.map((data: RegisterTrain, idx) => {
                         return (
                             <Link key={idx} href={'/doctor/manage/' + data._id}
                                   className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
