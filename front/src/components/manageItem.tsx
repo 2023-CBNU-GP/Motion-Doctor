@@ -1,10 +1,12 @@
 import React from "react";
 import { ManagePatients, RegisterTrain } from "@md/interfaces/manage.interface";
 import Link from "next/link";
+import VideoList from "@md/components/videoList";
 
-export default function ManageItem({manageData, registerTrainData}: {
+export default function ManageItem({manageData, registerTrainData, handleRemove}: {
     manageData: ManagePatients[] | null,
-    registerTrainData: RegisterTrain[] | null
+    registerTrainData: RegisterTrain[] | null,
+    handleRemove: any
 }) {
     return (
         <div>
@@ -31,12 +33,16 @@ export default function ManageItem({manageData, registerTrainData}: {
                         );
                     }) : registerTrainData?.map((data: RegisterTrain, idx) => {
                         return (
-                            <Link key={idx} href={'/doctor/manage/' + data._id}
-                                  className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
-                                <div className="w-[10%] flex justify-center">{idx + 1}</div>
-                                <div className="w-[50%] flex justify-center">{data.trainTitle}</div>
-                                <div className="w-[40%] flex justify-center">{data.trainListLen}</div>
-                            </Link>
+                            <div key={idx}>
+                                <Link href={'/doctor/manage/' + data._id}
+                                      className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
+                                    <div className="w-[10%] flex justify-center">{idx + 1}</div>
+                                    <div className="w-[50%] flex justify-center">{data.trainTitle}</div>
+                                    <div className="w-[40%] flex justify-center">{data.trainListLen}</div>
+                                </Link>
+                                <VideoList registerTrain={data} videos={data.video_info}
+                                           handleRemove={handleRemove}/>
+                            </div>
                         );
                     })
                 }

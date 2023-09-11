@@ -18,6 +18,13 @@ export interface ManagePatientDetail {
 export interface RegisterTrain {
     _id: string,
     doctorName?: string,
+    typeIdx: string,
+    video_info: Array<VideoInfo>,
     trainTitle: string,
     trainListLen: number,
+}
+
+export interface VideoInfo {
+    name: string,
+    video_name: string,
 }

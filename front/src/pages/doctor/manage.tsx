@@ -32,6 +32,8 @@ export default function Manage({manageData, registerTrainData}: {
     const [resPatientNum, setResPatientNum] = useState<DoctorInfo>();
     const [resRegisterTrain, setResRegisterTrain] = useState<RegisterTrain[]>();
 
+    // const [isRemoved, setIsRemoved]
+
     useEffect(() => {
         axiosClient.get('/api/user').then(response => {
             setInfo({
@@ -45,7 +47,7 @@ export default function Manage({manageData, registerTrainData}: {
     }, []);
 
     useEffect(() => {
-        if (info) {
+        if (info && tabIdx == 1) {
             axiosClient.post('/api/manage_list', {id: info?.id}).then(response => {
                 setResPatientNum({
                     _id: response.data.data._id,
@@ -58,13 +60,30 @@ export default function Manage({manageData, registerTrainData}: {
     }, [loading]);
 
     useEffect(() => {
-        axiosClient.get('/api/register_video').then(response => {
-            setResRegisterTrain(response.data.data.map((item: any) => {
-                return {_id: item._id, trainTitle: item.type, trainListLen: item.num};
-            }));
-        });
+        if (info && tabIdx == 0) {
+            axiosClient.get('/api/register_video').then(response => {
+                setResRegisterTrain(response.data.data.map((item: any) => {
+                    return {
+                        _id: item._id,
+                        trainTitle: item.type,
+                        trainListLen: item.num,
+                        typeIdx: item.idx,
+                        video_info: item.video_info,
+                    };
+                }));
+            });
+        }
+    }, [loading]);
 
-    }, []);
+    const handleRemove = (type: string, name: string) => {
+        axiosClient.post("/api/file_delete", {type, name}).then((response) => {
+            setLoading(!loading);
+            alert("동영상 파일 삭제를 완료하였습니다.");
+        }).catch((error) => {
+            console.log(error);
+            alert(error.response.data.detail);
+        });
+    }
 
     return (
         <div>
@@ -95,8 +114,9 @@ export default function Manage({manageData, registerTrainData}: {
                 </div>
 
                 {
-                    tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={resRegisterTrain!}/> :
-                        <ManageItem manageData={manageData} registerTrainData={null}/>
+                    tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={resRegisterTrain!}
+                                               handleRemove={handleRemove}/> :
+                        <ManageItem manageData={manageData} registerTrainData={null} handleRemove={handleRemove}/>
                 }
             </Layout>
         </div>
