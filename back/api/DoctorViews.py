@@ -171,7 +171,7 @@ class DoctorVideo(APIView):
         video_list = Correctpic.objects.filter(doctorid=doctor.uid)
 
         type_dict = {}
-        name_list = []
+        name_list,video_name = [],[]
         for video in video_list:
             if type_dict.get(video.exercisetype) is None:
                 type_dict[video.exercisetype] = 1
@@ -179,22 +179,28 @@ class DoctorVideo(APIView):
                 type_dict[video.exercisetype] += 1
 
             name_list.append(video.exercisename)
+            video_name.append(str(video.picturefilename))
 
         type_list = list(type_dict.keys())
 
         data_list = []
         j=0
         for i in range(len(type_dict)):
-            num = []
+            exercise = []
             for _ in range(type_dict[type_list[i]]):
-                num.append(name_list[j])
+                exercise_info = {
+                    "name": name_list[j],
+                    "video_name": video_name[j]
+                }
+                exercise.append(exercise_info)
                 j += 1
 
             data = {
                 "_id": i+1,
-                "type": type_list[i],
-                "name": num,
-                "num": type_dict[type_list[i]]
+                "type": type_list[i].split('-')[0],
+                "num": type_dict[type_list[i]],
+                "idx": type_list[i].split('-')[1],
+                "video_info": exercise
             }
             data_list.append(data)
 
