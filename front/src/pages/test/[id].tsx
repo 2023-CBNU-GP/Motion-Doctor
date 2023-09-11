@@ -21,7 +21,6 @@ export default function TestItem() {
             axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/video_list', {type: type}).then(res => {
                 console.log(res.data.data);
                 setCourseDetail(res.data.data);
-
             });
         }
     }, [type])

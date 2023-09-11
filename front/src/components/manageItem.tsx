@@ -34,7 +34,7 @@ export default function ManageItem({manageData, registerTrainData, handleRemove}
                     }) : registerTrainData?.map((data: RegisterTrain, idx) => {
                         return (
                             <div key={idx}>
-                                <Link href={'/doctor/manage/' + data._id}
+                                <Link href={'/doctor/register/' + data.trainTitle + "-" + data.typeIdx}
                                       className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
                                     <div className="w-[10%] flex justify-center">{idx + 1}</div>
                                     <div className="w-[50%] flex justify-center">{data.trainTitle}</div>
