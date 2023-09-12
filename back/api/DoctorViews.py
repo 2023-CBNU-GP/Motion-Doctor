@@ -98,6 +98,7 @@ class ManagePatientList(APIView):
                     "uid": patient.uid,
                     "patientName": patient.name,
                     "trainCourse": type_list[j].split('-')[0],
+                    "idx": type_list[j].split('-')[1],
                     "isCounseled": isCounseled
                 }
                 data_list.append(data)
