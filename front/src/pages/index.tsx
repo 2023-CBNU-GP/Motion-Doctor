@@ -7,6 +7,7 @@ import { UserLogin } from "@md/interfaces/user.interface";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { setCookie } from "@md/utils/cookies";
+import axiosClient from "@md/utils/axiosInstance";
 
 export default function Home() {
     const router = useRouter();
@@ -55,6 +56,15 @@ export default function Home() {
         validate,
     });
 
+    useEffect(() => {
+        axiosClient.get('/api/user').then(response => {
+            if (response.data.id) {
+                router.push('/intro');
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }, []);
 
     useEffect(() => {
 
