@@ -8,31 +8,14 @@ import { useEffect, useState } from "react";
 import ManageItem from "@md/components/manageItem";
 import axiosClient from "@md/utils/axiosInstance";
 
-export async function getStaticProps() {
-    const resManages = await fetch("http://localhost:3000" + "/api/get-manages");
-    const manageData = await resManages.json();
-
-    const resRegisterTrain = await fetch("http://localhost:3000" + "/api/get-train-list");
-    const registerTrainData = await resRegisterTrain.json();
-
-    return {props: {manageData, registerTrainData}};
-}
-
 // 의사가 진료하는 환자들을 확인할 수 있는 페이지
-export default function Manage({manageData, registerTrainData}: {
-    manageData: ManagePatients[] | null,
-    doctorData: DoctorInfo,
-    patientNumData: DoctorInfo,
-    registerTrainData: RegisterTrain[] | null,
-}) {
+export default function Manage() {
     const [tabIdx, setTabIdx] = useState(0);
 
     const [loading, setLoading] = useState(false);
     const [info, setInfo] = useState<DoctorInfo>();
-    const [resPatientNum, setResPatientNum] = useState<DoctorInfo>();
     const [resRegisterTrain, setResRegisterTrain] = useState<RegisterTrain[]>();
-
-    // const [isRemoved, setIsRemoved]
+    const [resManageData, setResManageData] = useState<ManagePatients[]>();
 
     useEffect(() => {
         axiosClient.get('/api/user').then(response => {
@@ -47,17 +30,19 @@ export default function Manage({manageData, registerTrainData}: {
     }, []);
 
     useEffect(() => {
-        if (info && tabIdx == 1) {
-            axiosClient.post('/api/manage_list', {id: info?.id}).then(response => {
-                setResPatientNum({
-                    _id: response.data.data._id,
-                    name: response.data.data.name,
-                    patientNum: response.data.data.patientNum?.toString(),
-                });
-                console.log(response.data.data.patientNum?.toString());
+        if (info && tabIdx == 1 && !resManageData) {
+            axiosClient.get('/api/patient_list').then(response => {
+                setResManageData(response.data.data.map((item: ManagePatients) => {
+                    return {
+                        _id: item._id,
+                        patientName: item.patientName,
+                        trainCourse: item.trainCourse,
+                        isCounseled: item.isCounseled,
+                    }
+                }));
             });
         }
-    }, [loading]);
+    }, [loading, tabIdx]);
 
     useEffect(() => {
         if (info && tabIdx == 0) {
@@ -97,8 +82,8 @@ export default function Manage({manageData, registerTrainData}: {
 
             {
                 tabIdx === 0 ?
-                    <Profile doctorData={info!} patientNumData={null} registerTrain={resRegisterTrain!}/> :
-                    <Profile doctorData={info!} patientNumData={resPatientNum!} registerTrain={null}/>
+                    <Profile doctorData={info!} manageData={null} registerTrain={resRegisterTrain!}/> :
+                    <Profile doctorData={info!} manageData={resManageData!} registerTrain={null}/>
             }
 
             <Layout>
@@ -116,7 +101,7 @@ export default function Manage({manageData, registerTrainData}: {
                 {
                     tabIdx === 0 ? <ManageItem manageData={null} registerTrainData={resRegisterTrain!}
                                                handleRemove={handleRemove}/> :
-                        <ManageItem manageData={manageData} registerTrainData={null} handleRemove={handleRemove}/>
+                        <ManageItem manageData={resManageData!} registerTrainData={null} handleRemove={handleRemove}/>
                 }
             </Layout>
         </div>
