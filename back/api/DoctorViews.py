@@ -124,35 +124,26 @@ class PatientTestList(APIView):
         patient = Patient.objects.filter(uid=uid).first()
         correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
 
-        i=0
-        data_list=[]
+        videoList, scoreList, nameList = [], [], []
         for correctpic in correctpic_list:
-            videoList, scoreList = [], []
-            name, type = '', ''
-            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid, patientid=patient.uid)
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid, patientid=patient.uid).last()
 
-            if not patientpic.exists():
-                break
+            if patientpic is None:
+                continue
 
-            for pic in patientpic:
-                videoList.append(str(pic.picturefilename))
-                scoreList.append(pic.score)
+            videoList.append(str(patientpic.picturefilename))
+            scoreList.append(patientpic.score)
+            nameList.append(correctpic.exercisename)
 
-            type = correctpic.exercisetype
-            name=correctpic.exercisename
+        data = {
+            "patientName": patient.name,
+            "trainTitle": body["type"].split('-')[0],
+            "trainName": nameList,
+            "videoList": videoList,
+            "scoreList": scoreList
+        }
 
-            data = {
-                "_id": i+1,
-                "patientName": patient.name,
-                "trainTitle": type.split('-')[0],
-                "trainName": name,
-                "videoList": videoList,
-                "scoreList": scoreList
-            }
-            data_list.append(data)
-            i+=1
-
-        return Response({'data': data_list})
+        return Response({'data': data})
 
 
 # 특정 의사가 본인이 올린 전체 영상 확인하는 API
