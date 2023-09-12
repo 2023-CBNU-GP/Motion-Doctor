@@ -92,5 +92,5 @@ class ScoreConsumers(AsyncWebsocketConsumer):
 
         await self.send(text_data=json.dumps({
                         'type': 'return value',
-                        'message': scoreAngle
+                        'message': score
                         }))

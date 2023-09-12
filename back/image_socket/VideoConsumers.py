@@ -11,6 +11,10 @@ from django.core.files import File
 from moviepy.editor import VideoFileClip
 import cv2
 
+from pydub import AudioSegment
+from pydub.utils import make_chunks
+import subprocess
+
 
 # 환자 모션 웹캠 저장 및 점수 반환 consumer
 class VideoConsumers(AsyncWebsocketConsumer):
@@ -18,27 +22,22 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # Base64 디코딩하여 바이너리 데이터로 변환
         binary_data = base64.b64decode(video_data)
 
-        # 임시파일 저장
+        # 임시파일 저장 (webm으로 저장 -> mp4로 수동 변환하면 안 깨짐)
         temp_path = tempfile.gettempdir()
-        with open(temp_path + '/video.mp4', 'wb') as wfile:
+        file_name = '/video.webm'
+        with open(temp_path + file_name, 'wb') as wfile:
             wfile.write(binary_data)
 
-        # while True:
-        #     if os.path.exists('media/' + 'video.webm'):
-        #         print("파일이 생성되었습니다.")
-        #         break
+        video_webm = temp_path + "/video.webm"
+        video2_mp4 = temp_path + "/video.mp4"
+        subprocess.run(f"ffmpeg -i {video_webm} {video2_mp4}", shell=True)
 
-        # os.chdir('/usr/src/app/media')
-        # print(os.getcwd())
-        # subprocess.call("ffmpeg -i video.webm video.mp4")
-        #
-        # os.chdir('/usr/src/app/')
         score = 0
         correctPic = Correctpic.objects.filter(exercisename=exercise_name, exercisetype=exercise_type).first()
         patient = Patient.objects.filter(id=patient_id).first()
 
-        # 새로운 Patientpic 객체 생성 및 저장
-        with open(temp_path + '/video.mp4', "rb") as file:
+        # 새로운 Patientpic 객체 생성 및 저장 (여기서 webm 파일을 mp4로 변환해야함)
+        with open(temp_path + "/video.mp4", "rb") as file:
             form = Patientpic()
 
             file_obj = File(file)
