@@ -35,6 +35,41 @@ class AngleManager():
                 xx,yy=poselist[id]
                 poselist[id]=[xx+x,yy+y]
 
+#벡터 1로 정규화
+## 12번을 기준으로 벡터 1로 만들어 정규화 해볼 예정
+
+## 1. 기준벡터(의사의 좌표값)을 벡터 1로 정규화한다.
+## 2. 의사의 크기/크기 1을 나눈 n배수를 구한다.
+## 3. 환자의 x,y값을 벡터 1값을 가지는 x,y좌표로 바꾼다. (x/dist,y/dist)
+## 4. 의사의 n배수를 곱하면, 두 크기가 같아진다?
+## ** 의사를 환자한테 맞춘다. 환자 영상을 볼 수 있기 때문 ?
+
+#######
+# 12 - 14 | 14 - 16
+# 11 - 13 | 13 - 15
+# 12 - 24 | 11 - 23
+# 24 - 26 | 26 - 28
+# 23 - 25 | 25 - 27
+#######
+    def adjustStd(patient, doctor):
+        thresh=[[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31]]
+        #thresh의 리스트 idx번에 해당하는 x,y좌표 리스트를 numpy화
+        #patient Standard 의 줄인말로, 환자 기준치를 의미한다.
+
+        for idx in range(len(thresh)) :
+            patiStd1 = np.array(patient[thresh[idx][0]])
+            patiStd2 = np.array(patient[thresh[idx][1]])
+            patiDist=np.linalg.norm(patiStd1-patiStd2) # 두 좌표간의 길이을 측정하는 함수
+
+            doctStd1 = np.array(doctor[thresh[idx][0]])
+            doctStd2 = np.array(doctor[thresh[idx][1]])
+            doctDist=np.linalg.norm(doctStd1-doctStd2)
+
+            newDoct2=doctStd1+((doctStd2-doctStd1)/doctDist)*patiDist
+            doctor[thresh[idx][1]]=newDoct2 #새로운 값으로 초기화
+
+        return doctor
+
     # cos 유사도는 각 벡터 사이의 유사도를 확인함...
     # teacher의 x,y좌표와 환자의 x,y좌표에 대해 우사도를 해야하나..?
     def GetSimiarityCos(self, TeacherJoint, PatientJoint):
