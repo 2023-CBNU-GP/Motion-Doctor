@@ -18,3 +18,4 @@ mediapipe
 moviepy
 pydub
 django-ffmpeg
+protobuf==3.20.*

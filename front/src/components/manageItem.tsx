@@ -21,7 +21,12 @@ export default function ManageItem({manageData, registerTrainData, handleRemove}
                 {
                     manageData ? manageData!.map((data: ManagePatients, idx) => {
                         return (
-                            <Link key={idx} href={'/doctor/manage/' + data._id}
+                            <Link key={idx} href={{
+                                pathname: `/doctor/manage/${data.uid}`,
+                                query: {
+                                    "type": `${data.trainCourse}-${data.idx}`
+                                }
+                            }}
                                   className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
                                 <div className="w-[10%] flex justify-center">{idx + 1}</div>
                                 <div className="w-[40%] flex justify-center">{data.patientName}</div>

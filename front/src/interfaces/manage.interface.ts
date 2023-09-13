@@ -1,7 +1,9 @@
 export interface ManagePatients {
     _id: string,
+    uid: string,
     patientName: string,
     trainCourse: string,
+    idx?: string,
     // 피드백 여부
     isCounseled: boolean,
 }
@@ -10,7 +12,7 @@ export interface ManagePatientDetail {
     _id: string,
     patientName: string,
     trainTitle: string,
-    trainList: Array<string>,
+    trainName: Array<string>,
     videoList: Array<string | File>,
     scoreList: Array<number>,
 }

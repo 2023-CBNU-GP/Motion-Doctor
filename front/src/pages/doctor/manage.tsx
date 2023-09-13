@@ -35,7 +35,9 @@ export default function Manage() {
                 setResManageData(response.data.data.map((item: ManagePatients) => {
                     return {
                         _id: item._id,
+                        uid: item.uid,
                         patientName: item.patientName,
+                        idx: item.idx,
                         trainCourse: item.trainCourse,
                         isCounseled: item.isCounseled,
                     }
