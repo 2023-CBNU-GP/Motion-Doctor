@@ -47,6 +47,10 @@ class VideoConsumers(AsyncWebsocketConsumer):
             form.patientid = patient
 
             form.save()
+            print("파일이 생성되었습니다.")
+
+        os.remove('/tmp/video.webm')
+        os.remove('/tmp/video.mp4')
 
         # 환자가 영상을 찍으면 해당 의사와 매칭
         if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:

@@ -124,7 +124,7 @@ class PatientTestList(APIView):
         patient = Patient.objects.filter(uid=uid).first()
         correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
 
-        videoList, scoreList, nameList = [], [], []
+        videoList, scoreList, nameList, commentList = [], [], [], []
         for correctpic in correctpic_list:
             patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid, patientid=patient.uid).last()
 
@@ -135,12 +135,16 @@ class PatientTestList(APIView):
             scoreList.append(patientpic.score)
             nameList.append(correctpic.exercisename)
 
+            comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
+            commentList.append(comment)
+
         data = {
             "patientName": patient.name,
             "trainTitle": body["type"].split('-')[0],
             "trainName": nameList,
             "videoList": videoList,
-            "scoreList": scoreList
+            "scoreList": scoreList,
+            "commentList": commentList
         }
 
         return Response({'data': data})
