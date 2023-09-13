@@ -64,16 +64,25 @@ class ScoreConsumers(AsyncWebsocketConsumer):
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
 
+        #의사 파일 가져오는 코드 작성해줘 
+        #file_name = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
+        #cap1 = cv2.VideoCapture(file_name)
+        #detector1 = PoseDetector() #의사용
         similarity = 0.0
         while True:
             success, img = cap.read()
+            #_,doctorFrame = cap1.read()
 
             Curframe = cap.get(cv2.CAP_PROP_POS_FRAMES)
+            #두 이미지의 크기 정규화 : 의사의 이미지 -> 환자의 이미지 크기로 키우거나 줄임.
+            #skeleton_image = cv2.resize(doctorFram, (img.shape[1], img.shape[0]))
 
             if Curframe >= frameCount / 3 and Curframe <= frameCount - frameCount / 3:  # 현재 프레임 수를 확인 후, 지정된 프레임 이상일 시 동영상에서 스켈렙톤 뽑아내기
                 img = detector.findPose(img)
-                lmList = detector.findPosition(img)
-
+                lmList,patient = detector.findPosition(img)
+                #doctorFrame = detector.findPose(doctorFrame)
+                #_,doctor = detector1.findPosition(doctorFrame)
+                #angleManager.adjustStd(patient,doctor)
                 # 사이각 구하기 공식
                 angleManager.GetAngle(lmList, patientAngle)
                 angleManager.GetAverageAngle(lmList, patientAngle)
