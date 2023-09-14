@@ -36,18 +36,26 @@ class VideoConsumers(AsyncWebsocketConsumer):
         correctPic = Correctpic.objects.filter(exercisename=exercise_name, exercisetype=exercise_type).first()
         patient = Patient.objects.filter(id=patient_id).first()
 
-        # 새로운 Patientpic 객체 생성 및 저장 (여기서 webm 파일을 mp4로 변환해야함)
-        with open(temp_path + "/video.mp4", "rb") as file:
-            form = Patientpic()
+        patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).first()
+        if patientpic is None:
+            # 새로운 Patientpic 객체 생성 및 저장 (여기서 webm 파일을 mp4로 변환해야함)
+            with open(temp_path + "/video.mp4", "rb") as file:
+                form = Patientpic()
 
-            file_obj = File(file)
-            form.picturefilename = file_obj
-            form.score = score
-            form.correctpicid = correctPic
-            form.patientid = patient
+                file_obj = File(file)
+                form.picturefilename = file_obj
+                form.score = score
+                form.correctpicid = correctPic
+                form.patientid = patient
 
-            form.save()
-            print("파일이 생성되었습니다.")
+                form.save()
+                print("파일이 생성되었습니다.")
+
+        else:
+            with open(temp_path + "/video.mp4", "rb") as file:
+                file_obj = File(file)
+                patientpic.picturefilename = file_obj
+                patientpic.save()
 
         os.remove('/tmp/video.webm')
         os.remove('/tmp/video.mp4')

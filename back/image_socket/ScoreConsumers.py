@@ -40,10 +40,10 @@ class ScoreConsumers(AsyncWebsocketConsumer):
     async def handle_text_data(self, text_data):
         print("work")
         body = json.loads(text_data)
-        correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
+        correctpic = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
 
         while True:
-            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid).last()
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
             print(patientpic)
             if patientpic is not None:
                 print("탈출합니다.")
@@ -51,6 +51,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name_patient = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
+        print(file_name_patient)
         cap = cv2.VideoCapture(file_name_patient)
         pTime = 0
         detector = PoseDetector()
