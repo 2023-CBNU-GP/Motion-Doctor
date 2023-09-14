@@ -23,24 +23,20 @@ class DoctorComment(APIView):
 
         doctor = Doctor.objects.filter(id=payload["id"]).first()
 
-        comment = Doctorcomment()
-        comment.text = body["text"]
-        comment.doctorid = doctor
+        patientpic = Patientpic.objects.filter(picturefilename=body['video']).first()
+        comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
 
-        # 환자 영상 링크 전체를 보내줄 때
-        comment.pictureid = Patientpic.objects.filter(picturefilename=body['video']).first()
+        if comment is None:
+            doctor_comment = Doctorcomment()
+            doctor_comment.text = body["text"]
+            doctor_comment.doctorid = doctor
 
-        # 재활코스 타입과 이름으로 보내줄 때
-        #correctpic = Correctpic.objects.filter(exercisetype=body['type'], exercisename=body['name']).first()
-        #patientpic_list = Patientpic.objects.filter(correctpicid=correctpic)
-
-        #for patientpic in patientpic_list:
-        #    file_name = str(patientpic.picturefilename).split('/')[2].split('-')[2]
-        #    if file_name[:10] == body['idx']:
-        #        comment.pictureid = patientpic
-        #        break
-
-        comment.save()
+            # 환자 영상 링크 전체를 보내줄 때
+            doctor_comment.pictureid = patientpic
+            doctor_comment.save()
+        else:
+            comment.text = body['text']
+            comment.save()
 
         response = Response()
         response.data = {
