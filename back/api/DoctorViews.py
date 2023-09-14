@@ -24,7 +24,7 @@ class DoctorComment(APIView):
         doctor = Doctor.objects.filter(id=payload["id"]).first()
 
         patientpic = Patientpic.objects.filter(picturefilename=body['video']).first()
-        comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
+        comment = Doctorcomment.objects.filter(pictureid=patientpic).first()
 
         if comment is None:
             doctor_comment = Doctorcomment()
@@ -67,38 +67,48 @@ class ManagePatientList(APIView):
         data_list = []
         for manage in manage_list:
             patient = Patient.objects.filter(uid=manage.patientid.uid).first()
-            patientpic_list = Patientpic.objects.filter(patientid=manage.patientid)
+            patientpic_list = Patientpic.objects.filter(patientid=patient)
 
             type_dict = {}
             for patientpic in patientpic_list:
-                correctpic = Correctpic.objects.filter(uid=patientpic.correctpicid.uid).first()
-
-                if type_dict.get(correctpic.exercisetype) is None:
-                    type_dict[correctpic.exercisetype] = 1
+                if type_dict.get(patientpic.correctpicid.exercisetype) is None:
+                    type_dict[patientpic.correctpicid.exercisetype] = 1
                 else:
-                    type_dict[correctpic.exercisetype] += 1
+                    type_dict[patientpic.correctpicid.exercisetype] += 1
 
-            type_list = list(type_dict.keys())
+            for type in list(type_dict.keys()):
+                isCounseled, flag = True, False
+                comment_list = []
 
-            k=0
-            for j in range(len(type_dict)):
-                isCounseled = True
-                for _ in range(type_dict[type_list[j]]):
-                    comment = Doctorcomment.objects.filter(pictureid=patientpic_list[k].uid).first()
-                    if comment is None:
-                        isCounseled = False
-                    k+=1
+                correctpic = Correctpic.objects.filter(exercisetype=type)
+                for pic in correctpic:
+                    patientpic = Patientpic.objects.filter(correctpicid=pic, patientid=patient).last()
 
-                data = {
-                    "_id": i,
-                    "uid": patient.uid,
-                    "patientName": patient.name,
-                    "trainCourse": type_list[j].split('-')[0],
-                    "idx": type_list[j].split('-')[1],
-                    "isCounseled": isCounseled
-                }
-                data_list.append(data)
-                i += 1
+                    # 아직 코스를 다 수행하지 않은 경우
+                    if patientpic is None:
+                        flag = True
+                        break
+
+                    comment = Doctorcomment.objects.filter(pictureid=patientpic).first()
+                    comment_list.append(comment)
+
+                if flag:
+                    continue
+                else:
+                    for c in comment_list:
+                        if c is None:
+                            isCounseled = False
+
+                    data = {
+                        "_id": i,
+                        "uid": patient.uid,
+                        "patientName": patient.name,
+                        "trainCourse": type.split('-')[0],
+                        "idx": type.split('-')[1],
+                        "isCounseled": isCounseled
+                    }
+                    data_list.append(data)
+                    i += 1
 
         return Response({'data': data_list})
 
@@ -122,17 +132,14 @@ class PatientTestList(APIView):
 
         videoList, scoreList, nameList, commentList = [], [], [], []
         for correctpic in correctpic_list:
-            patientpic = Patientpic.objects.filter(correctpicid=correctpic.uid, patientid=patient.uid).last()
-
-            if patientpic is None:
-                continue
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic, patientid=patient).last()
 
             videoList.append(str(patientpic.picturefilename))
             scoreList.append(patientpic.score)
             nameList.append(correctpic.exercisename)
 
             comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
-            commentList.append(comment)
+            commentList.append(comment.text)
 
         data = {
             "patientName": patient.name,
@@ -160,40 +167,36 @@ class DoctorVideo(APIView):
             raise AuthenticationFailed("Unauthenticated!")
 
         doctor = Doctor.objects.filter(id=payload["id"]).first()
-        video_list = Correctpic.objects.filter(doctorid=doctor.uid)
+        video_list = Correctpic.objects.filter(doctorid=doctor)
 
         type_dict = {}
-        name_list,video_name = [],[]
         for video in video_list:
             if type_dict.get(video.exercisetype) is None:
                 type_dict[video.exercisetype] = 1
             else:
                 type_dict[video.exercisetype] += 1
 
-            name_list.append(video.exercisename)
-            video_name.append(str(video.picturefilename))
-
-        type_list = list(type_dict.keys())
-
+        i = 1
         data_list = []
-        j=0
-        for i in range(len(type_dict)):
+        for type in list(type_dict.keys()):
             exercise = []
-            for _ in range(type_dict[type_list[i]]):
+
+            correctpic = Correctpic.objects.filter(doctorid=doctor, exercisetype=type)
+            for pic in correctpic:
                 exercise_info = {
-                    "name": name_list[j],
-                    "video_name": video_name[j]
+                    "name": pic.exercisename,
+                    "video_name": str(pic.picturefilename)
                 }
                 exercise.append(exercise_info)
-                j += 1
 
             data = {
-                "_id": i+1,
-                "type": type_list[i].split('-')[0],
-                "num": type_dict[type_list[i]],
-                "idx": type_list[i].split('-')[1],
+                "_id": i,
+                "type": type.split('-')[0],
+                "num": type_dict[type],
+                "idx": type.split('-')[1],
                 "video_info": exercise
             }
             data_list.append(data)
+            i += 1
 
         return Response({'data': data_list})

@@ -41,7 +41,7 @@ class DoctorPatientList(APIView):
 
             correctpic = Correctpic.objects.filter(exercisetype=type)
             for pic in correctpic:
-                patientpic = Patientpic.objects.filter(correctpicid=pic.uid).last()
+                patientpic = Patientpic.objects.filter(correctpicid=pic.uid, patientid=patient).last()
                 # 아직 코스를 다 수행하지 않은 경우
                 if patientpic is None:
                     flag=True
@@ -49,7 +49,7 @@ class DoctorPatientList(APIView):
                 
                 score_list.append(patientpic.score)
 
-                comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
+                comment = Doctorcomment.objects.filter(pictureid=patientpic).first()
                 comment_list.append(comment)
 
                 uid = pic.doctorid.uid
@@ -59,10 +59,11 @@ class DoctorPatientList(APIView):
             else:
                 text = '내원 불필요'
                 for c in comment_list:
-                    if c.text == '내원 필요':
-                        text = '내원 필요'
                     if c is None:
                         text = '아직 평가되지 않음'
+                    elif c.text == '내원 필요':
+                        text = '내원 필요'
+
                 score = sum(score_list) / type_dict[type]
 
             doctor = Doctor.objects.filter(uid=uid).first()
