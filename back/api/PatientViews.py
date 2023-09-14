@@ -26,54 +26,57 @@ class DoctorPatientList(APIView):
         patientpic_list = Patientpic.objects.filter(patientid=patient)
 
         type_dict = {}
-        comment_list = []
-        score_list = []
-        doctor_list = []
         for patientpic in patientpic_list:
-            correctpic = Correctpic.objects.filter(uid=patientpic.correctpicid.uid).first()
-            doctor = Doctor.objects.filter(uid=correctpic.doctorid.uid).first()
-            if type_dict.get(correctpic.exercisetype) is None:
-                type_dict[correctpic.exercisetype] = 1
+            if type_dict.get(patientpic.correctpicid.exercisetype) is None:
+                type_dict[patientpic.correctpicid.exercisetype] = 1
             else:
-                type_dict[correctpic.exercisetype] += 1
+                type_dict[patientpic.correctpicid.exercisetype] += 1
 
-            comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
-            score = patientpic.score
-
-            comment_list.append(comment)
-            score_list.append(score)
-            doctor_list.append(doctor)
-
-        keys = list(type_dict.keys())
-        values = list(type_dict.values())
-
+        i=1
         data_list = []
-        i,j=0,0
-        for num in values:
-            text = '내원 불필요'
-            system_score=0
-            for _ in range(num):
-                if comment_list[j] == '내원 필요':
-                    text = '내원 필요'
-                if comment_list[j] is None:
-                    text = '아직 평가되지 않음'
+        for type in list(type_dict.keys()):
+            comment_list, score_list = [], []
+            uid, score = 0, 0
+            flag = False
 
-                system_score+=score_list[j]
+            correctpic = Correctpic.objects.filter(exercisetype=type)
+            for pic in correctpic:
+                patientpic = Patientpic.objects.filter(correctpicid=pic.uid).last()
+                # 아직 코스를 다 수행하지 않은 경우
+                if patientpic is None:
+                    flag=True
+                    break
+                
+                score_list.append(patientpic.score)
 
-                j+=1
+                comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
+                comment_list.append(comment)
 
+                uid = pic.doctorid.uid
+
+            if flag:
+                text = "아직 코스를 수행하지 않음"
+            else:
+                text = '내원 불필요'
+                for c in comment_list:
+                    if c.text == '내원 필요':
+                        text = '내원 필요'
+                    if c is None:
+                        text = '아직 평가되지 않음'
+                score = sum(score_list) / type_dict[type]
+
+            doctor = Doctor.objects.filter(uid=uid).first()
             data = {
-                "_id": i+1,
-                "trainTitle": keys[i].split('-')[0],
-                "trainNum": num,
-                "doctorName": doctor_list[i].name,
-                "hospitalName": doctor_list[i].hospitalname,
-                "score": system_score/num,
+                "_id": i,
+                "trainTitle": type.split('-')[0],
+                "trainNum": type_dict[type],
+                "doctorName": doctor.name,
+                "hospitalName": doctor.hospitalname,
+                "score": score,
                 "counselResult": text
             }
             data_list.append(data)
-
-            i+=1
+            i += 1
 
         return Response({'data': data_list})
 
