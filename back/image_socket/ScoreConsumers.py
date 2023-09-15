@@ -76,13 +76,13 @@ class ScoreConsumers(AsyncWebsocketConsumer):
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
         ##저장용
-        w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
+        #w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        #h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        #fps = cap.get(cv2.CAP_PROP_FPS)
         #mp4확장자 선택을 위함
-        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+        #fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         #앞 string 파일 이름
-        out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
+        #out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
 
         while True:
             success, target_image = cap.read()
@@ -113,9 +113,9 @@ class ScoreConsumers(AsyncWebsocketConsumer):
                 angleManager.GetAverageJoint(lmList, poselist)
                 similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
                 angleManager.adjustStd(patient,doctor)
-                target_image=detector1.drawPose(target_image,doctor,100)
+                #target_image=detector1.drawPose(target_image,doctor,100)
 
-            out.write(target_image) #data저장용
+            #out.write(target_image) #data저장용
 
         print(scoreAngle)
         print(similarity)
