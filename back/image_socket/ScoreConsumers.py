@@ -97,16 +97,15 @@ class ScoreConsumers(AsyncWebsocketConsumer):
             Curframe = cap.get(cv2.CAP_PROP_POS_FRAMES)
             #두 이미지의 크기 정규화 : 의사의 이미지 -> 환자의 이미지 크기로 키우거나 줄임.
             skeleton_image = cv2.resize(doctorFrame, (target_image.shape[1], target_image.shape[0]))
+            target_image = detector.findPose(target_image)
+            skeleton_image = detector1.findPose(skeleton_image)
 
+            lmList,patient = detector.findPosition(target_image)
+            _, doctor = detector1.findPosition(skeleton_image)
+            angleManager.adjustStd(patient,doctor)
+            target_image=detector1.drawPose(target_image,doctor,100)
+            out.write(target_image) #data저장용
             if Curframe >= frameCount / 3 and Curframe <= frameCount - frameCount / 3:  # 현재 프레임 수를 확인 후, 지정된 프레임 이상일 시 동영상에서 스켈렙톤 뽑아내기
-                target_image = detector.findPose(target_image)
-                doctorFrame = detector1.findPose(doctorFrame)
-
-                lmList,patient = detector.findPosition(target_image)
-                _, doctor = detector1.findPosition(doctorFrame)
-
-                angleManager.adjustStd(patient,doctor)
-                target_image=detector1.drawPose(target_image,doctor,100)
                 # 사이각 구하기 공식
                 angleManager.GetAngle(lmList, patientAngle)
                 angleManager.GetAverageAngle(lmList, patientAngle)
@@ -114,7 +113,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
                 # cos유사도
                 angleManager.GetAverageJoint(lmList, poselist)
                 similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
-            out.write(target_image) #data저장용
+
         print(scoreAngle)
         print(similarity)
         out.release()
