@@ -27,15 +27,18 @@ class PoseDetector() :
         return img
     
         #좌표를 그리는 함수인데, 하나만 가져가면 된다. 아래 하나는 임시 시험용 ... 색을 다르게하기 위함
-    def drawPose(self,img,list,color,draw=True):
+    def drawPose(self,img,pose,color,draw=True):
+        thresh=[[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31]]
         imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         self.results = self.pose.process(imgRGB)
 
-        for id,landmark in enumerate(list) :
+        for id, landmark in enumerate(pose) :
             cx,cy = landmark[0],landmark[1] #해당 지점에 대한 x,y좌표를 찾아냄.
-            print(landmark)
-            cv2.circle(img,(int(cx),int(cy)),5,(0,0,color),thickness=-1) #그려지는 원형이 작아짐.
+            cv2.circle(img,(int(cx),int(cy)),5,(0,0,color),thickness=-1,lineType=cv2.LINE_8) #그려지는 원형이 작아짐.
 
+        for idx in range(len(thresh)) :
+            #print(landmark)
+            cv2.line(img,list(map(int, pose[thresh[idx][0]])),list(map(int, pose[thresh[idx][1]])),(0,0,color),8)
         return img
     
 
