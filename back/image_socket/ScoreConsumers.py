@@ -120,7 +120,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
 
         print(scoreAngle)
         print(similarity)
-        out.release()
+        # out.release()
         cap.release()
         cap1.release()
         cv2.destroyAllWindows()

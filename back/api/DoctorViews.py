@@ -139,7 +139,10 @@ class PatientTestList(APIView):
             nameList.append(correctpic.exercisename)
 
             comment = Doctorcomment.objects.filter(pictureid=patientpic.uid).first()
-            commentList.append(comment.text)
+            if comment is None:
+                commentList.append(None)
+            else:
+                commentList.append(comment.text)
 
         data = {
             "patientName": patient.name,
