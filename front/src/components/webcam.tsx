@@ -122,7 +122,7 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     }
 
     const handleSend = async () => {
-        socketScore.current?.send(JSON.stringify({type: typeData}));
+        socketScore.current?.send(JSON.stringify({type: typeData, name: name}));
         setSendType(false);
     }
 
@@ -146,16 +146,6 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
             const blob = new Blob(recordedChunks, {
                 type: "video/webm",
             });
-
-            const url = webkitURL.createObjectURL(blob);
-            const a = document.createElement("a");
-            document.body.appendChild(a);
-            // @ts-ignore
-            a.style = "display: none";
-            a.href = url;
-            a.download = "motion.webm";
-            a.click();
-            window.URL.revokeObjectURL(url);
 
             const reader = new FileReader();
 
