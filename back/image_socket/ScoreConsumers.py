@@ -104,7 +104,8 @@ class ScoreConsumers(AsyncWebsocketConsumer):
 
                 lmList,patient = detector.findPosition(target_image)
                 _, doctor = detector1.findPosition(skeleton_image)
-
+                angleManager.adjustStd(patient,doctor)
+                
                 # 사이각 구하기 공식
                 angleManager.GetAngle(lmList, patientAngle)
                 angleManager.GetAverageAngle(lmList, patientAngle)
@@ -112,7 +113,7 @@ class ScoreConsumers(AsyncWebsocketConsumer):
                 # cos유사도
                 angleManager.GetAverageJoint(lmList, poselist)
                 similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
-                angleManager.adjustStd(patient,doctor)
+
                 #target_image=detector1.drawPose(target_image,doctor,100)
 
             #out.write(target_image) #data저장용
