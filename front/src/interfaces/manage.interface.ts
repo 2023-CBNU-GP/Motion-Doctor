@@ -15,6 +15,7 @@ export interface ManagePatientDetail {
     trainName: Array<string>,
     videoList: Array<string | File>,
     scoreList: Array<number>,
+    commentList: Array<string>
 }
 
 export interface RegisterTrain {
