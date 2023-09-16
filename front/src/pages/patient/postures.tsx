@@ -33,11 +33,11 @@ export default function Postures() {
                         <div
                             className="w-[20%] flex justify-center">재활 코스 명
                         </div>
-                        <div className="w-[20%] flex justify-center">재활 코스내 운동 개수</div>
+                        <div className="w-[10%] flex justify-center">운동 개수</div>
                         <div className="w-[15%] flex justify-center">담당의사</div>
                         <div className="w-[15%] flex justify-center">병원명</div>
                         <div className="w-[10%] flex justify-center">AI 피드백</div>
-                        <div className="w-[10%] flex justify-center">의사 피드백</div>
+                        <div className="w-[20%] flex justify-center">의사 피드백</div>
                         <div className="w-[5%] flex justify-center">삭제</div>
                     </div>
                     {
@@ -47,12 +47,12 @@ export default function Postures() {
                                      className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
                                     <div className="w-[5%] flex justify-center">{idx + 1}</div>
                                     <div className="w-[20%] flex justify-center">{data.trainTitle}</div>
-                                    <div className="w-[20%] flex justify-center">{data.trainNum}</div>
+                                    <div className="w-[10%] flex justify-center">{data.trainNum}</div>
                                     <div className="w-[15%] flex justify-center">{data.doctorName}</div>
                                     <div className="w-[15%] flex justify-center">{data.hospitalName}</div>
-                                    <div className="w-[10%] flex justify-center">91점</div>
+                                    <div className="w-[10%] flex justify-center">{data.score}</div>
                                     <div
-                                        className="w-[10%] flex justify-center">{data.counselResult ? data.counselResult.toString() : "0"}</div>
+                                        className="w-[20%] flex justify-center">{data.counselResult ? data.counselResult.toString() : "0"}</div>
                                     <div className="w-[5%] flex justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                              strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
