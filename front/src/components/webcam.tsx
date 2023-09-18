@@ -5,7 +5,7 @@ import axios from "@md/utils/axiosInstance";
 const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
 const VIDEO_URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/webcam';
 
-export default function WebCam({typeData, name}: { typeData: string, name: string }) {
+export default function WebCam({typeData, name, setTime}: { typeData: string, name: string, setTime: any }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>();
     const interval = useRef<any>();
@@ -29,8 +29,34 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
         [setRecordedChunks]
     );
 
+    function sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const startTimer = () => {
+        let times = 1;
+        setTime(1);
+        return new Promise((resolve, reject) => {
+            const interval1 = setInterval(() => {
+                console.log(times);
+                if (times <= 10) {
+                    times++;
+                    setTime(times);
+                    resolve(times);
+                } else {
+                    clearInterval(interval1);
+                    reject(new Error('500'));
+                }
+            }, 1000);
+        });
+    }
+
+
     // 영상 촬영 시작 && object-detection 을 위한 10초 마다 이미지 전송
-    const handleStartCaptureClick = useCallback(() => {
+    const handleStartCaptureClick = useCallback(async () => {
+        startTimer().then();
+        await sleep(10000);
+
         setCapturing(true);
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {mimeType: 'video/webm;'});
 
@@ -38,12 +64,14 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
             "dataavailable",
             handleDataAvailable
         );
+
         mediaRecorderRef.current.start();
 
         socketObject.current = new WebSocket(URL);
         socketObject.current.onopen = () => {
             console.log("연결 성공");
         }
+
         interval.current = setInterval(() => {
             const pictureSrc = webcamRef.current.getScreenshot();
             socketObject.current.send(pictureSrc);
@@ -135,7 +163,7 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
                 ) : (
                     <div onClick={() => {
                         if (webcamRef.current.stream != null) {
-                            handleStartCaptureClick()
+                            handleStartCaptureClick();
                         }
                     }} className="cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-8 h-8">

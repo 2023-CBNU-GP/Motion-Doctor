@@ -1,6 +1,6 @@
 import { router } from "next/client";
 
-export default function Modal({title, content, setIsModal}: { title: string, content: string, setIsModal: any }) {
+export default function Message({title, content, setIsModal}: { title: string, content: string, setIsModal: any }) {
     return (
         <div className={`z-50 absolute h-screen w-screen backdrop-brightness-50 backdrop-blur`}>
             <div className={`w-full h-full flex flex-col justify-center items-center`}>

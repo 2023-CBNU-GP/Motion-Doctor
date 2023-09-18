@@ -4,12 +4,19 @@ import Head from "next/head";
 import WebCam from "@md/components/webcam";
 import axios from "axios";
 import { CourseDetail } from "@md/interfaces/course.interface";
-import Modal from "@md/components/modal";
+import Message from "@md/components/modal/message";
+import Timer from "@md/components/modal/timer";
 
 export default function TestItem() {
     const [type, setType] = useState<string>();
     const [courseDetail, setCourseDetail] = useState<CourseDetail>();
     const [isModal, setIsModal] = useState<boolean>(false);
+
+    const vidRef = useRef<any>(null);
+    const [isPause, setIsPause] = useState(false);
+    const [tabIdx, setTabIdx] = useState(0);
+    const [time, setTime] = useState<number>(0);
+
 
     // 첫 렌더링 때 특정 코스에 대한 전체 데이터 불러오는 api
     useEffect(() => {
@@ -30,10 +37,6 @@ export default function TestItem() {
     useEffect(() => {
     }, [isModal]);
 
-    const vidRef = useRef<any>(null);
-    const [isPause, setIsPause] = useState(false);
-    const [tabIdx, setTabIdx] = useState(0);
-
     const handlePlayVideo = () => {
         if (!isPause) {
             vidRef.current.play();
@@ -41,7 +44,7 @@ export default function TestItem() {
             vidRef.current.pause();
         }
     }
-    
+
     return (
         <div className="h-screen overflow-hidden">
             <Head>
@@ -51,11 +54,14 @@ export default function TestItem() {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
 
+            {
+                (time != 11 && 0 != time) && <Timer time={time}></Timer>
+            }
 
             {
-                isModal && <Modal setIsModal={setIsModal}
-                                  title={'재활코스 등록을 완료하였습니다'}
-                                  content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}/>
+                isModal && <Message setIsModal={setIsModal}
+                                    title={'재활코스 등록을 완료하였습니다'}
+                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}/>
             }
 
             <Navigation></Navigation>
@@ -95,7 +101,8 @@ export default function TestItem() {
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
-                        <WebCam typeData={type! as string} name={courseDetail?.trainList[tabIdx] as string}></WebCam>
+                        <WebCam typeData={type! as string} name={courseDetail?.trainList[tabIdx] as string}
+                                setTime={setTime}></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">
