@@ -52,22 +52,22 @@ class AngleManager():
 # 23 - 25 | 25 - 27
 #######
     def adjustStd(self,patient, doctor):
-    thresh=[[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31]]
-    #thresh의 리스트 idx번에 해당하는 x,y좌표 리스트를 numpy화
-    #patient Standard 의 줄인말로, 환자 기준치를 의미한다.
+        thresh=[[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31]]
+        #thresh의 리스트 idx번에 해당하는 x,y좌표 리스트를 numpy화
+        #patient Standard 의 줄인말로, 환자 기준치를 의미한다.
 
-    for idx in range(len(thresh)) :
-        patiStd1 = np.array(patient[thresh[idx][0]])
-        patiStd2 = np.array(patient[thresh[idx][1]])
-        patiDist=np.linalg.norm(patiStd1-patiStd2) # 두 좌표간의 길이을 측정하는 함수
+        for idx in range(len(thresh)) :
+            patiStd1 = np.array(patient[thresh[idx][0]])
+            patiStd2 = np.array(patient[thresh[idx][1]])
+            patiDist=np.linalg.norm(patiStd1-patiStd2) # 두 좌표간의 길이을 측정하는 함수
 
-        doctStd1 = np.array(doctor[thresh[idx][0]])
-        doctStd2 = np.array(doctor[thresh[idx][1]])
-        doctDist=np.linalg.norm(doctStd1-doctStd2)
+            doctStd1 = np.array(doctor[thresh[idx][0]])
+            doctStd2 = np.array(doctor[thresh[idx][1]])
+            doctDist=np.linalg.norm(doctStd1-doctStd2)
 
-        newDoct2=doctStd1+((doctStd2-doctStd1)/doctDist)*patiDist
-        doctor[thresh[idx][1]]=newDoct2 #새로운 값으로 초기화
-    return doctor
+            newDoct2=doctStd1+((doctStd2-doctStd1)/doctDist)*patiDist
+            doctor[thresh[idx][1]]=newDoct2 #새로운 값으로 초기화
+        return doctor
 
 #의사 Pose 좌표를 평행이동한다.
     def transPos(self,thresX,thresY,doctor):
@@ -76,7 +76,7 @@ class AngleManager():
             doctor[idx][0]+=thresX
             doctor[idx][1]+=thresY
 
-    return doctor
+        return doctor
     # cos 유사도는 각 벡터 사이의 유사도를 확인함...
     # teacher의 x,y좌표와 환자의 x,y좌표에 대해 우사도를 해야하나..?
     def GetSimiarityCos(self, TeacherJoint, PatientJoint):
