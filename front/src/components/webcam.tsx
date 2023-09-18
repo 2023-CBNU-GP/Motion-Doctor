@@ -14,7 +14,7 @@ export default function WebCam({typeData, name, setTime}: { typeData: string, na
     const socketVideo = useRef<any>();
 
     const [base64Data, setBase64Data] = useState<any>(null);
-    const [sendVideo, setSendVideo] = useState(true);
+    const [sendVideo, setSendVideo] = useState(false);
     const [idx, setIdx] = useState(1);
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
@@ -38,7 +38,6 @@ export default function WebCam({typeData, name, setTime}: { typeData: string, na
         setTime(1);
         return new Promise((resolve, reject) => {
             const interval1 = setInterval(() => {
-                console.log(times);
                 if (times <= 10) {
                     times++;
                     setTime(times);
@@ -122,6 +121,7 @@ export default function WebCam({typeData, name, setTime}: { typeData: string, na
     useEffect(() => {
         if (sendVideo) {
             handleSendVideo().then(() => {
+                alert('재활 운동을 등록하였습니다.');
             });
         }
     }, [sendVideo]);
