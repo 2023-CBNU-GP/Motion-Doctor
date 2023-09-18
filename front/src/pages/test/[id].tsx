@@ -4,10 +4,12 @@ import Head from "next/head";
 import WebCam from "@md/components/webcam";
 import axios from "axios";
 import { CourseDetail } from "@md/interfaces/course.interface";
+import Modal from "@md/components/modal";
 
 export default function TestItem() {
     const [type, setType] = useState<string>();
     const [courseDetail, setCourseDetail] = useState<CourseDetail>();
+    const [isModal, setIsModal] = useState<boolean>(false);
 
     // 첫 렌더링 때 특정 코스에 대한 전체 데이터 불러오는 api
     useEffect(() => {
@@ -23,7 +25,10 @@ export default function TestItem() {
                 setCourseDetail(res.data.data);
             });
         }
-    }, [type])
+    }, [type]);
+
+    useEffect(() => {
+    }, [isModal]);
 
     const vidRef = useRef<any>(null);
     const [isPause, setIsPause] = useState(false);
@@ -36,6 +41,7 @@ export default function TestItem() {
             vidRef.current.pause();
         }
     }
+    
     return (
         <div className="h-screen overflow-hidden">
             <Head>
@@ -45,9 +51,16 @@ export default function TestItem() {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
 
+
+            {
+                isModal && <Modal setIsModal={setIsModal}
+                                  title={'재활코스 등록을 완료하였습니다'}
+                                  content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}/>
+            }
+
             <Navigation></Navigation>
 
-            <div className="flex h-full relative">
+            <div className="flex h-full">
                 <div className="h-full w-[20%] flex flex-col">
                     <div
                         className="flex h-full flex-col overflow-hidden drop-shadow-sm overflow-y-scroll divide-y divide-stone-200 divide-solid">
@@ -76,8 +89,9 @@ export default function TestItem() {
                         }
                     </div>
 
-                    <a className="fixed w-[20%] inset-x-0 bottom-0 py-5 px-3 text-center cursor-pointer"
-                       href={`/patient/upload`}>자세등록하기</a>
+                    <div className="fixed w-[20%] inset-x-0 bottom-0 py-5 px-3 text-center cursor-pointer"
+                         onClick={() => setIsModal(true)}>자세등록하기
+                    </div>
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
@@ -97,7 +111,6 @@ export default function TestItem() {
                     }
                 </div>
             </div>
-
         </div>
     );
 }

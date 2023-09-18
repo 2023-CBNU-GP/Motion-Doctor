@@ -10,8 +10,7 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     const mediaRecorderRef = useRef<any>(null);
     const interval = useRef<any>();
 
-    const socketObDect = useRef<any>();
-    const socketScore = useRef<any>();
+    const socketObject = useRef<any>();
     const socketVideo = useRef<any>();
 
     const [base64Data, setBase64Data] = useState<any>(null);
@@ -19,7 +18,6 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     const [idx, setIdx] = useState(1);
     const [capturing, setCapturing] = useState(false);
     const [recordedChunks, setRecordedChunks] = useState([]);
-    const [sendType, setSendType] = useState(false);
 
     // 옛날 영상 없애기
     const handleDataAvailable = useCallback(
@@ -42,14 +40,14 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
         );
         mediaRecorderRef.current.start();
 
-        socketObDect.current = new WebSocket(URL);
-        socketObDect.current.onopen = () => {
+        socketObject.current = new WebSocket(URL);
+        socketObject.current.onopen = () => {
             console.log("연결 성공");
         }
         interval.current = setInterval(() => {
             const pictureSrc = webcamRef.current.getScreenshot();
-            socketObDect.current.send(pictureSrc);
-            socketObDect.current.onmessage = (data: string) => {
+            socketObject.current.send(pictureSrc);
+            socketObject.current.onmessage = (data: string) => {
                 console.log(data);
             }
         }, 10000);
@@ -66,8 +64,8 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     }, [mediaRecorderRef, setCapturing]);
 
     const handleVideoSocket = async () => {
-        await socketObDect.current.close(1000);
-        socketObDect.current.onclose = (e: any) => {
+        await socketObject.current.close(1000);
+        socketObject.current.onclose = (e: any) => {
             if (e.code === 1000) {
                 console.log(e);
             }
@@ -96,46 +94,9 @@ export default function WebCam({typeData, name}: { typeData: string, name: strin
     useEffect(() => {
         if (sendVideo) {
             handleSendVideo().then(() => {
-                handleNewSocket().then();
             });
         }
     }, [sendVideo]);
-
-    const handleNewSocket = async () => {
-        if (socketVideo.current !== undefined) {
-            await socketVideo.current?.close(1000);
-
-            socketVideo.current.onclose = (e: any) => {
-                if (e.code === 1000) {
-                    console.log(e);
-                }
-            }
-
-            axios.get(process.env.NEXT_PUBLIC_API_KEY + "/api/user").then((response) => {
-                socketScore.current = new WebSocket(process.env.NEXT_PUBLIC_SOCKET + "/ws/" + response.data.uid);
-                socketScore.current.onopen = () => {
-                    console.log("연결");
-                    setSendType(true);
-                }
-            });
-        }
-    }
-
-    const handleSend = async () => {
-        socketScore.current?.send(JSON.stringify({type: typeData, name: name}));
-        setSendType(false);
-    }
-
-    useEffect(() => {
-        if (sendType) {
-            handleSend().then(() => {
-                socketScore.current.onmessage = (event: any) => {
-                    const json_data = JSON.parse(event.data);
-                    console.log("socket2: " + json_data.message);
-                }
-            });
-        }
-    }, [sendType]);
 
 
     // 촬영 종료된 영상이 있으면 서버에 전송
