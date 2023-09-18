@@ -37,6 +37,9 @@ class ScoreConsumers(AsyncWebsocketConsumer):
             await self.handle_text_data(text_data)
             # 결과값을 프론트에 알림
 
+    async def find(self,cap):
+        return cap.read()
+
     async def handle_text_data(self, text_data):
         print("work")
         body = json.loads(text_data)
@@ -85,8 +88,8 @@ class ScoreConsumers(AsyncWebsocketConsumer):
         #out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
 
         while True:
-            success, target_image = cap.read()
-            _,doctorFrame = cap1.read()
+            success, target_image = self.find(cap)
+            _,doctorFrame = self.find(cap1)
 
             if target_image is None:
                 break
@@ -95,32 +98,29 @@ class ScoreConsumers(AsyncWebsocketConsumer):
                 break
 
             Curframe = cap.get(cv2.CAP_PROP_POS_FRAMES)
-            #두 이미지의 크기 정규화 : 의사의 이미지 -> 환자의 이미지 크기로 키우거나 줄임.
-            skeleton_image = cv2.resize(doctorFrame, (target_image.shape[1], target_image.shape[0]))
 
-            if Curframe >= frameCount / 3 and Curframe <= frameCount - frameCount / 3:  # 현재 프레임 수를 확인 후, 지정된 프레임 이상일 시 동영상에서 스켈렙톤 뽑아내기
-                target_image = detector.findPose(target_image)
-                skeleton_image = detector1.findPose(skeleton_image)
+            target_image = detector.findPose(target_image)
+            skeleton_image = detector1.findPose(skeleton_image)
 
-                lmList,patient = detector.findPosition(target_image)
-                _, doctor = detector1.findPosition(skeleton_image)
-                angleManager.adjustStd(patient,doctor)
+            lmList,patient = detector.findPosition(target_image)
+            _, doctor = detector1.findPosition(skeleton_image)
+
+            angleManager.adjustStd(patient,doctor)
+            angleManager.transPos(patient[0][0]-doctor[0][0],patient[0][1]-doctor[0][1],doctor)
+            angleManager.target_image=detector1.drawPose(target_image,doctor,100)
                 
                 # 사이각 구하기 공식
-                angleManager.GetAngle(lmList, patientAngle)
-                angleManager.GetAverageAngle(lmList, patientAngle)
-                angleManager.ComparePose(teacherAngle, patientAngle, scoreAngle)
+            angleManager.GetAngle(lmList, patientAngle)
+            angleManager.GetAverageAngle(lmList, patientAngle)
+            angleManager.ComparePose(teacherAngle, patientAngle, scoreAngle)
                 # cos유사도
-                angleManager.GetAverageJoint(lmList, poselist)
-                similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
-
-                #target_image=detector1.drawPose(target_image,doctor,100)
+            angleManager.GetAverageJoint(lmList, poselist)
+            similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
 
             #out.write(target_image) #data저장용
 
         print(scoreAngle)
         print(similarity)
-        # out.release()
         cap.release()
         cap1.release()
         cv2.destroyAllWindows()
