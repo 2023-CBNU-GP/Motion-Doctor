@@ -117,13 +117,13 @@ class VideoConsumers(AsyncWebsocketConsumer):
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
         ##저장용
-        # w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        # h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # fps = cap.get(cv2.CAP_PROP_FPS)
+        w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
         # mp4확장자 선택을 위함
-        # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         # 앞 string 파일 이름
-        # out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
+        out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
 
         while True:
             success, target_image = await self.find(cap)
@@ -147,7 +147,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
             angleManager.adjustStd(patient, doctor)
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
             angleManager.target_image = detector1.drawPose(target_image, doctor, 100)
-
+            out.write(angleManager.target_image) #data저장용
             # 사이각 구하기 공식
             angleManager.GetAngle(lmList, patientAngle)
             angleManager.GetAverageAngle(lmList, patientAngle)
@@ -156,11 +156,11 @@ class VideoConsumers(AsyncWebsocketConsumer):
             angleManager.GetAverageJoint(lmList, poselist)
             similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
 
-            # out.write(target_image) #data저장용
-
+        
         print(scoreAngle)
         print(similarity)
         cap.release()
+        out.release()
         cap1.release()
         cv2.destroyAllWindows()
         score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
