@@ -146,8 +146,8 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
             angleManager.adjustStd(patient, doctor)
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
-            angleManager.target_image = detector1.drawPose(target_image, doctor, 100)
-            out.write(angleManager.target_image) #data저장용
+            target_image = detector1.drawPose(target_image, doctor, 100)
+            out.write(target_image) #data저장용
             # 사이각 구하기 공식
             angleManager.GetAngle(lmList, patientAngle)
             angleManager.GetAverageAngle(lmList, patientAngle)
