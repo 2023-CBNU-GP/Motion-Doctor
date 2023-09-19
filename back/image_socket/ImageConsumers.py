@@ -40,7 +40,7 @@ class ImageConsumers(AsyncWebsocketConsumer):
         if bytes_data:
             await self.handle_binary_message(bytes_data)
 
-    def handle_binary_message(self, bytes_data):
+    async def handle_binary_message(self, bytes_data):
         # 이미지 받기
         byte_img = BytesIO(bytes_data)
         img_file = Image.open(byte_img)
@@ -49,7 +49,7 @@ class ImageConsumers(AsyncWebsocketConsumer):
         # 여기에 img_file 모델로 넘겨서 true or false 리턴하게 해주면 됨!
         result = True
 
-        self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps({
             'type': 'received value',
             'message': result
         }))

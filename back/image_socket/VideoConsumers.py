@@ -208,3 +208,5 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         # 응답을 보낼 때는 send() 메서드를 사용합니다.
         await self.send(text_data='Video saved successfully.')
+
+        await self.disconnect(1000)
