@@ -82,6 +82,32 @@ class DoctorPatientList(APIView):
         return Response({'data': data_list})
 
 
+class CheckCourse(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+        body = json.loads(request.body.decode('utf-8'))
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        patient = Patient.objects.filter(id=payload["id"]).first()
+        correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
+
+        flag = True
+        for correctpic in correctpic_list:
+            patientpic = Patientpic.objects.filter(correctpicid=correctpic, patientid=patient).first()
+            if patientpic is None:
+                flag = False
+                break
+
+        return Response({'data': flag})
+
+
 # 환자가 자신이 등록한 비디오 삭제하는 API - 구현해야함
 class RemoveVideo(APIView):
     def post(self, request):
