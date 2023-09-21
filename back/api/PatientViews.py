@@ -82,6 +82,7 @@ class DoctorPatientList(APIView):
         return Response({'data': data_list})
 
 
+# 환자가 특정 재활코스를 모두 수행했는지 확인하는 API
 class CheckCourse(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
@@ -108,7 +109,7 @@ class CheckCourse(APIView):
         return Response({'data': flag})
 
 
-# 환자가 자신이 등록한 비디오 삭제하는 API - 구현해야함
+# 환자가 자신이 등록한 비디오 삭제하는 API
 class RemoveVideo(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
@@ -123,15 +124,16 @@ class RemoveVideo(APIView):
             raise AuthenticationFailed("Unauthenticated!")
 
         patient = Patient.objects.filter(id=payload["id"]).first()
-        correctpic = Correctpic.objects.filter(exercisetype=body['type']).first()
+        correctpic_list = Correctpic.objects.filter(exercisetype=body["type"])
 
-        video = Patientpic.objects.filter(patientid=patient, correctpicid=correctpic).first()
+        for correctpic in correctpic_list:
+            video = Patientpic.objects.filter(patientid=patient, correctpicid=correctpic).first()
 
-        # 사용자가 없는 경우
-        if video is None:
-            raise FileNotFoundError("삭제하려고 하는 파일이 존재하지 않습니다.")
+            # 사용자가 없는 경우
+            if video is None:
+                raise FileNotFoundError("삭제하려고 하는 파일이 존재하지 않습니다.")
 
-        video.delete()
+            video.delete()
 
         response = Response()
         response.data = {

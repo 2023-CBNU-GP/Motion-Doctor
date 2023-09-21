@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import *
-from . import serializers
 import json
 
 
@@ -21,7 +20,7 @@ class ApproveRejectDoctor(APIView):
         elif doctor_type == "rejection":
             doctor.state = "rejection"
         else:
-            raise serializers.ValidationError('승인여부 type이 잘못 입력되었습니다.')
+            raise ValueError('승인여부 type이 잘못 입력되었습니다.')
 
         doctor.save()
 

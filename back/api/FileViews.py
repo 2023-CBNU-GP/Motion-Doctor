@@ -1,9 +1,3 @@
-import base64
-import shutil
-
-import cv2
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
@@ -14,15 +8,9 @@ import string
 
 import jwt
 from . import serializers
-import json
 
 from .AngleManager import *
 from .PoseDetector import *
-
-import tempfile
-import subprocess
-from os import path
-import time
 
 
 # 의사가 파일 업로드하는 API 입니다!

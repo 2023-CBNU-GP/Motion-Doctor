@@ -3,16 +3,12 @@ import json
 import os
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.conf import settings
 from api.models import *
 
 import tempfile
 from django.core.files import File
-from moviepy.editor import VideoFileClip
 import cv2
 
-from pydub import AudioSegment
-from pydub.utils import make_chunks
 import subprocess
 from api.AngleManager import *
 from api.PoseDetector import *
@@ -66,13 +62,6 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         os.remove('/tmp/video.webm')
         os.remove('/tmp/video.mp4')
-
-        # 환자가 영상을 찍으면 해당 의사와 매칭
-        if Manage.objects.filter(doctorid=correctPic.doctorid, patientid=patient).first() is None:
-            manage_form = Manage()
-            manage_form.doctorid = correctPic.doctorid
-            manage_form.patientid = patient
-            manage_form.save()
 
         # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
         # media 폴더에 있는 영상을 인공지능 모델에 연결시켜서 결과값을 리턴해야하는데
