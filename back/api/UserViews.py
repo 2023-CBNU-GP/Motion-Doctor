@@ -35,6 +35,8 @@ class RegisterView(APIView):
             user.email = body["email"]
             user.doctornum = body["doctornum"]
             user.hospitalname = body["hospitalname"]
+            # 일단 관리자 로그인 없앨거라 회원가입할 때 승인 상태로 바꿈
+            user.state = "approval"
 
         else:
             raise serializers.ValidationError("잘못된 type을 입력하였습니다.")
