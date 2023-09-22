@@ -206,61 +206,61 @@ class DoctorVideo(APIView):
 
 
 # 의사가 환자 승인하는 API
-class ApprovePatient(APIView):
-    def post(self, request):
-        token = request.COOKIES.get('jwt')
-        body = json.loads(request.body.decode('utf-8'))
-
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        doctor = Doctor.objects.filter(id=payload["id"]).first()
-        patient = Patient.objects.filter(id=body["id"]).first()
-        isApprove = body["type"]
-
-        # 의사와 환자 매칭
-        if isApprove == "approval":
-            manage_form = Manage()
-            manage_form.doctorid = doctor
-            manage_form.patientid = patient
-            manage_form.save()
-
-        # 환자와 의사 연결 해제
-        elif isApprove == "rejection":
-            manage_form = Manage.objects.filter(doctorid=doctor, patientid=patient).first()
-            if manage_form is None:
-                raise ValueError("승인되어있지 않은 환자 id 입니다.")
-            manage_form.delete()
-
-        else:
-            raise ValueError('승인여부 type이 잘못 입력되었습니다.')
-
-        response = Response()
-        response.data = {
-            'message': 'success'
-        }
-
-        return response
+# class ApprovePatient(APIView):
+#     def post(self, request):
+#         token = request.COOKIES.get('jwt')
+#         body = json.loads(request.body.decode('utf-8'))
+#
+#         if not token:
+#             raise AuthenticationFailed("Unauthenticated!")
+#
+#         try:
+#             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+#         except jwt.ExpiredSignatureError:
+#             raise AuthenticationFailed("Unauthenticated!")
+#
+#         doctor = Doctor.objects.filter(id=payload["id"]).first()
+#         patient = Patient.objects.filter(id=body["id"]).first()
+#         isApprove = body["type"]
+#
+#         # 의사와 환자 매칭
+#         if isApprove == "approval":
+#             manage_form = Manage()
+#             manage_form.doctorid = doctor
+#             manage_form.patientid = patient
+#             manage_form.save()
+#
+#         # 환자와 의사 연결 해제
+#         elif isApprove == "rejection":
+#             manage_form = Manage.objects.filter(doctorid=doctor, patientid=patient).first()
+#             if manage_form is None:
+#                 raise ValueError("승인되어있지 않은 환자 id 입니다.")
+#             manage_form.delete()
+#
+#         else:
+#             raise ValueError('승인여부 type이 잘못 입력되었습니다.')
+#
+#         response = Response()
+#         response.data = {
+#             'message': 'success'
+#         }
+#
+#         return response
 
 
 # 의사가 전체 환자 목록을 확인하는 api (환자 승인하는 페이지)
-class TotalPatientList(APIView):
-    def get(self, request):
-        data_list = []
-
-        user_list = Patient.objects.all()
-        for user in user_list:
-            data = {
-                "_id": user.uid,
-                "name": user.name,
-                "id": user.id,
-                "email": user.email,
-            }
-            data_list.append(data)
-
-        return Response({"data": data_list})
+# class TotalPatientList(APIView):
+#     def get(self, request):
+#         data_list = []
+#
+#         user_list = Patient.objects.all()
+#         for user in user_list:
+#             data = {
+#                 "_id": user.uid,
+#                 "name": user.name,
+#                 "id": user.id,
+#                 "email": user.email,
+#             }
+#             data_list.append(data)
+#
+#         return Response({"data": data_list})

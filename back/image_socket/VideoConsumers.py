@@ -63,6 +63,13 @@ class VideoConsumers(AsyncWebsocketConsumer):
         os.remove('/tmp/video.webm')
         os.remove('/tmp/video.mp4')
 
+        doctor_uid = Doctor.objects.filter(uid=correctPic.doctorid).first()
+        if Manage.objects.filter(patientid=patient, doctorid=doctor_uid).first() is None:
+            manage_form = Manage()
+            manage_form.doctorid = doctor_uid
+            manage_form.patientid = patient
+            manage_form.save()
+
         # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
         # media 폴더에 있는 영상을 인공지능 모델에 연결시켜서 결과값을 리턴해야하는데
         # 이때 프론트에서 새롭게 연결한 웹소켓으로 결과값을 전송하는 것

@@ -64,34 +64,47 @@ class ListDoctor(APIView):
 class ListDoctorVideo(APIView):
     # 환자가 본인의 담당 의사에 대한 동영상 정보 볼 수 있는 api
     def get(self, request):
-        token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        patient = Patient.objects.filter(id=payload["id"]).first()
-        manage_list = Manage.objects.filter(patientid=patient)
-
         data_list = []
         video_list = Correctpic.objects.all().values('doctorid', 'exercisetype').annotate(Count('uid'))
-        for manage in manage_list:
-            doctor_video = video_list.filter(doctorid=manage.doctorid)
+        for video in video_list:
+            doctor = Doctor.objects.filter(uid=video['doctorid']).first()
+            data = {
+                "doctor_name": doctor.name,
+                "doctor_hospitalName": doctor.hospitalname,
+                "video_num": video['uid__count'],
+                "type": video['exercisetype'].split('-')[0],
+                 "typeIdx": video['exercisetype'].split('-')[1]
+            }
+            data_list.append(data)
 
-            for video in doctor_video:
-                doctor = Doctor.objects.filter(uid=video['doctorid']).first()
-                data = {
-                    "doctor_name": doctor.name,
-                    "doctor_hospitalName": doctor.hospitalname,
-                    "video_num": video['uid__count'],
-                    "type": video['exercisetype'].split('-')[0],
-                    "typeIdx": video['exercisetype'].split('-')[1]
-                }
-                data_list.append(data)
+        # token = request.COOKIES.get('jwt')
+        #
+        # if not token:
+        #     raise AuthenticationFailed("Unauthenticated!")
+        #
+        # try:
+        #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        # except jwt.ExpiredSignatureError:
+        #     raise AuthenticationFailed("Unauthenticated!")
+        #
+        # patient = Patient.objects.filter(id=payload["id"]).first()
+        # manage_list = Manage.objects.filter(patientid=patient)
+        #
+        # data_list = []
+        # video_list = Correctpic.objects.all().values('doctorid', 'exercisetype').annotate(Count('uid'))
+        # for manage in manage_list:
+        #     doctor_video = video_list.filter(doctorid=manage.doctorid)
+        #
+        #     for video in doctor_video:
+        #         doctor = Doctor.objects.filter(uid=video['doctorid']).first()
+        #         data = {
+        #             "doctor_name": doctor.name,
+        #             "doctor_hospitalName": doctor.hospitalname,
+        #             "video_num": video['uid__count'],
+        #             "type": video['exercisetype'].split('-')[0],
+        #             "typeIdx": video['exercisetype'].split('-')[1]
+        #         }
+        #         data_list.append(data)
 
         return Response({'data': data_list})
 
