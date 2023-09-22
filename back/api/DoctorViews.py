@@ -246,3 +246,21 @@ class ApprovePatient(APIView):
         }
 
         return response
+
+
+# 의사가 전체 환자 목록을 확인하는 api (환자 승인하는 페이지)
+class TotalPatientList(APIView):
+    def get(self, request):
+        data_list = []
+
+        user_list = Patient.objects.all()
+        for user in user_list:
+            data = {
+                "_id": user.uid,
+                "name": user.name,
+                "id": user.id,
+                "email": user.email,
+            }
+            data_list.append(data)
+
+        return Response({"data": data_list})
