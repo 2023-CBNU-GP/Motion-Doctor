@@ -112,7 +112,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # mp4확장자 선택을 위함
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         # 앞 string 파일 이름
-        out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
+        out=cv2.VideoWriter(file_name_patient,fourcc, 30, (w, h))
 
         while True:
             success, target_image = await self.find(cap)
