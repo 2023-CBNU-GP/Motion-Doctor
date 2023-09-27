@@ -48,8 +48,8 @@ export default function TestItem() {
     useEffect(() => {
         if (isModal) {
             axiosClient.post('/api/check_course', {type: type}).then((res) => {
-                if (res.data) setIsFinished(true);
-            })
+                if (res.data) setIsFinished(res.data.data);
+            });
         }
     }, [isModal]);
 
@@ -86,8 +86,7 @@ export default function TestItem() {
                 (isModal && !isFinished) && <Message setIsModal={setIsModal}
                                                      title={'재활코스 등록을 실패하였습니다'}
                                                      content={'아직 모든 재활코스를 등록하지 않으셨습니다. 모두 완료하신 다음 클릭해주세요.'}
-                                                     uid={user?.uid!}
-                                                     type={type!}/>
+                />
             }
 
             <Navigation></Navigation>

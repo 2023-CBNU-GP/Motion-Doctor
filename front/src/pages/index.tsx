@@ -6,8 +6,7 @@ import validate, { InitialValue } from "@md/hooks/validate";
 import { UserLogin } from "@md/interfaces/user.interface";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { setCookie } from "@md/utils/cookies";
-import axiosClient from "@md/utils/axiosInstance";
+import { getCookie, setCookie } from "@md/utils/cookies";
 
 export default function Home() {
     const router = useRouter();
@@ -57,13 +56,9 @@ export default function Home() {
     });
 
     useEffect(() => {
-        axiosClient.get('/api/user').then(response => {
-            if (response.data.id) {
-                router.push('/intro');
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+        if (getCookie('jwt')) {
+            router.push('/intro');
+        }
     }, []);
 
     useEffect(() => {
