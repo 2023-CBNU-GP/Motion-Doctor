@@ -73,7 +73,7 @@ class ListDoctorVideo(APIView):
                 "doctor_hospitalName": doctor.hospitalname,
                 "video_num": video['uid__count'],
                 "type": video['exercisetype'].split('-')[0],
-                 "typeIdx": video['exercisetype'].split('-')[1]
+                "typeIdx": video['exercisetype'].split('-')[1]
             }
             data_list.append(data)
 

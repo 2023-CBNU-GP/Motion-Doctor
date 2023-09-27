@@ -70,6 +70,7 @@ class DoctorPatientList(APIView):
             data = {
                 "_id": i,
                 "trainTitle": type.split('-')[0],
+                "idx": type.split('-')[1],
                 "trainNum": type_dict[type],
                 "doctorName": doctor.name,
                 "hospitalName": doctor.hospitalname,

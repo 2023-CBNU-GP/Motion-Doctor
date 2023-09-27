@@ -63,7 +63,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         os.remove('/tmp/video.webm')
         os.remove('/tmp/video.mp4')
 
-        doctor_uid = Doctor.objects.filter(uid=correctPic.doctorid).first()
+        doctor_uid = Doctor.objects.filter(uid=correctPic.doctorid.uid).first()
         if Manage.objects.filter(patientid=patient, doctorid=doctor_uid).first() is None:
             manage_form = Manage()
             manage_form.doctorid = doctor_uid
@@ -115,7 +115,12 @@ class VideoConsumers(AsyncWebsocketConsumer):
         ##저장용
         w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
         fps = cap.get(cv2.CAP_PROP_FPS)
+        print("환자 ", fps)
+        fps1 = cap1.get(cv2.CAP_PROP_FPS)
+        print("의사 ", fps1)
+
         # mp4확장자 선택을 위함
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         # 앞 string 파일 이름
