@@ -1,33 +1,44 @@
 import Navigation from "@md/components/navigation";
-import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import WebCam from "@md/components/webcam";
-import axios from "axios";
-import { CourseDetail } from "@md/interfaces/course.interface";
 import Message from "@md/components/modal/message";
 import Timer from "@md/components/modal/timer";
+import { CourseDetail } from "@md/interfaces/course.interface";
+import { UserInfo } from "@md/interfaces/user.interface";
+import { useRouter } from "next/dist/client/router";
+import { useEffect, useRef, useState } from "react";
+import axiosClient from "@md/utils/axiosInstance";
 
 export default function TestItem() {
     const [type, setType] = useState<string>();
     const [courseDetail, setCourseDetail] = useState<CourseDetail>();
     const [isModal, setIsModal] = useState<boolean>(false);
+    const [isFinished, setIsFinished] = useState<boolean>(false);
 
     const vidRef = useRef<any>(null);
     const [isPause, setIsPause] = useState(false);
     const [tabIdx, setTabIdx] = useState(0);
     const [time, setTime] = useState<number>(0);
+    const [user, setUser] = useState<UserInfo>();
 
+    const router = useRouter();
 
     // 첫 렌더링 때 특정 코스에 대한 전체 데이터 불러오는 api
     useEffect(() => {
-        alert("**새로고침이 될 시, 기존 테스트 데이터들이 모두 삭제됩니다** \n 테스트 영상의 길이는 1분 이상이어야 합니다");
-        const href = decodeURI(window.location.pathname).split('/');
-        setType(href.pop());
-    }, []);
+        if (!router.isReady) return;
+        else {
+            alert("**새로고침이 될 시, 기존 테스트 데이터들이 모두 삭제됩니다** \n 테스트 영상의 길이는 1분 이상이어야 합니다");
+            const href = decodeURI(router.query.id as string);
+            axiosClient.get('/api/user').then((res) => {
+                setUser(res.data);
+            })
+            setType(href);
+        }
+    }, [router.isReady]);
 
     useEffect(() => {
         if (type) {
-            axios.post(process.env.NEXT_PUBLIC_API_KEY + '/api/video_list', {type: type}).then(res => {
+            axiosClient.post('/api/video_list', {type: type}).then(res => {
                 console.log(res.data.data);
                 setCourseDetail(res.data.data);
             });
@@ -35,6 +46,11 @@ export default function TestItem() {
     }, [type]);
 
     useEffect(() => {
+        if (isModal) {
+            axiosClient.post('/api/check_course', {type: type}).then((res) => {
+                if (res.data) setIsFinished(true);
+            })
+        }
     }, [isModal]);
 
     const handlePlayVideo = () => {
@@ -59,9 +75,19 @@ export default function TestItem() {
             }
 
             {
-                isModal && <Message setIsModal={setIsModal}
-                                    title={'재활코스 등록을 완료하였습니다'}
-                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}/>
+                (isModal && isFinished) && <Message setIsModal={setIsModal}
+                                                    title={'재활코스 등록을 완료하였습니다'}
+                                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
+                                                    uid={user?.uid!}
+                                                    type={type!}/>
+            }
+
+            {
+                (isModal && !isFinished) && <Message setIsModal={setIsModal}
+                                                     title={'재활코스 등록을 실패하였습니다'}
+                                                     content={'아직 모든 재활코스를 등록하지 않으셨습니다. 모두 완료하신 다음 클릭해주세요.'}
+                                                     uid={user?.uid!}
+                                                     type={type!}/>
             }
 
             <Navigation></Navigation>

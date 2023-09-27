@@ -1,6 +1,12 @@
 import { router } from "next/client";
 
-export default function Message({title, content, setIsModal}: { title: string, content: string, setIsModal: any }) {
+export default function Message({title, content, uid, type, setIsModal}: {
+    title: string,
+    content: string,
+    uid?: string,
+    type?: string,
+    setIsModal: any
+}) {
     return (
         <div className={`z-50 absolute h-screen w-screen backdrop-brightness-50 backdrop-blur`}>
             <div className={`w-full h-full flex flex-col justify-center items-center`}>
@@ -11,11 +17,19 @@ export default function Message({title, content, setIsModal}: { title: string, c
                         <div className={`whitespace-normal`}>{content}</div>
                     </div>
                     <div className={`justify-end flex`}>
-                        <button className={`w-[50%] bg-color-primary-500 text-white py-1 rounded-lg`}
-                                onClick={() => {
-                                    router.push('/test');
-                                    setIsModal(false);
-                                }}>확인
+                        <button
+                            className={`${(uid && type) ? "bg-color-primary-500" : "bg-color-danger-500"} w-[50%]  text-white py-1 rounded-lg`}
+                            onClick={() => {
+                                if (uid && type) {
+                                    router.push({
+                                        pathname: `/result/${uid}`,
+                                        query: {
+                                            "type": type
+                                        }
+                                    });
+                                }
+                                setIsModal(false);
+                            }}>확인
                         </button>
                     </div>
                 </div>
