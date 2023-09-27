@@ -4,6 +4,7 @@ export interface PostureInfo {
     doctorName: string,
     trainTitle: string,
     trainNum: number,
+    idx: string,
     score: number,
     counselResult: string,
 }
