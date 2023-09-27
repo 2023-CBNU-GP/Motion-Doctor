@@ -30,6 +30,14 @@ export interface UserLogin {
     type: string
 }
 
+export interface UserInfo {
+    uid: string,
+    name: string,
+    id: string,
+    email: string,
+    type: string,
+}
+
 export interface DoctorInfo {
     _id: string,
     id?: string,
