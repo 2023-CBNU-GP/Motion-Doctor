@@ -124,7 +124,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # mp4확장자 선택을 위함
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         # 앞 string 파일 이름
-        out=cv2.VideoWriter(file_name_patient,fourcc, 30, (w, h))
+        out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
 
         while True:
             success, target_image = await self.find(cap)
@@ -148,7 +148,9 @@ class VideoConsumers(AsyncWebsocketConsumer):
             angleManager.adjustStd(patient, doctor)
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
             target_image = detector1.drawPose(target_image, doctor, 100)
-            out.write(target_image) #data저장용
+            if target_image is not None :
+                out.write(target_image) #data저장용
+
             # 사이각 구하기 공식
             angleManager.GetAngle(lmList, patientAngle)
             angleManager.GetAverageAngle(lmList, patientAngle)
