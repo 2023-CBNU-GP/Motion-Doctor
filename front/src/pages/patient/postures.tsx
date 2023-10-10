@@ -4,11 +4,20 @@ import React, { useEffect, useState } from "react";
 import Layout from "@md/components/layout";
 import { PostureInfo } from "@md/interfaces/posture.interface";
 import axiosClient from "@md/utils/axiosInstance";
+import Link from 'next/link'
 
 export default function Postures() {
     const [resPostures, setResPostures] = useState<PostureInfo[]>();
     const [isDeleted, setIsDeleted] = useState<boolean>(false);
-    
+    const [uid, setUid] = useState<String>("");
+
+    useEffect(() => {
+        axiosClient.get('/api/user').then(response => {
+            setUid(response.data.uid);
+        })
+    }, []);
+
+
     useEffect(() => {
         axiosClient.get('/api/test_list').then(response => {
             setResPostures(response.data.data);
@@ -42,10 +51,12 @@ export default function Postures() {
                         <div className="w-[5%] flex justify-center">삭제</div>
                     </div>
                     {
+
                         resPostures && resPostures!.map((data: PostureInfo, idx) => {
                             return (
-                                <div key={idx}
-                                     className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
+                                <Link href={{pathname: `/result/${uid}`, query: {"type": `${data.trainTitle}-${data.idx}`}}}
+                                      key={idx}
+                                      className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
                                     <div className="w-[5%] flex justify-center">{idx + 1}</div>
                                     <div className="w-[20%] flex justify-center">{data.trainTitle}</div>
                                     <div className="w-[10%] flex justify-center">{data.trainNum}</div>
@@ -55,7 +66,8 @@ export default function Postures() {
                                     <div
                                         className="w-[20%] flex justify-center">{data.counselResult ? data.counselResult.toString() : "0"}</div>
                                     <div className="w-[5%] flex justify-center">
-                                        <button onClick={() => {
+                                        <button onClick={(e) => {
+                                            e.preventDefault();
                                             axiosClient.post('/api/remove_video', {type: `${data.trainTitle}-${data.idx}`}).then((res) => {
                                                 setIsDeleted(!isDeleted);
                                             });
@@ -67,7 +79,7 @@ export default function Postures() {
                                             </svg>
                                         </button>
                                     </div>
-                                </div>
+                                </Link>
                             );
                         })
                     }

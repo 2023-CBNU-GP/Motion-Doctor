@@ -27,7 +27,7 @@ export default function TestItem() {
     useEffect(() => {
         if (!router.isReady) return;
         else {
-            alert("**새로고침이 될 시, 기존 테스트 데이터들이 모두 삭제됩니다** \n 테스트 영상의 길이는 1분 이상이어야 합니다");
+            alert("**새로고침이 될 시, 기존 테스트 데이터들이 모두 삭제됩니다**");
             const href = decodeURI(router.query.id as string);
             axiosClient.get('/api/user').then((res) => {
                 setUser(res.data);
@@ -44,14 +44,6 @@ export default function TestItem() {
             });
         }
     }, [type]);
-
-    useEffect(() => {
-        if (isModal) {
-            axiosClient.post('/api/check_course', {type: type}).then((res) => {
-                if (res.data) setIsFinished(res.data.data);
-            });
-        }
-    }, [isModal]);
 
     const handlePlayVideo = () => {
         if (!isPause) {
@@ -75,17 +67,9 @@ export default function TestItem() {
             }
 
             {
-                (isModal && isFinished) && <Message setIsModal={setIsModal}
-                                                    title={'재활코스 등록을 완료하였습니다'}
-                                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
-                                                    uid={user?.uid!}
-                                                    type={type!}/>
-            }
-
-            {
-                (isModal && !isFinished) && <Message setIsModal={setIsModal}
-                                                     title={'재활코스 등록을 실패하였습니다'}
-                                                     content={'아직 모든 재활코스를 등록하지 않으셨습니다. 모두 완료하신 다음 클릭해주세요.'}
+                isModal && <Message setIsModal={setIsModal}
+                                    title={'수고하셨습니다'}
+                                    content={'재활코스 동영상 저장을 완료하였습니다.'}
                 />
             }
 

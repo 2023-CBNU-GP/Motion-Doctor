@@ -18,16 +18,9 @@ export default function Message({title, content, uid, type, setIsModal}: {
                     </div>
                     <div className={`justify-end flex`}>
                         <button
-                            className={`${(uid && type) ? "bg-color-primary-500" : "bg-color-danger-500"} w-[50%]  text-white py-1 rounded-lg`}
+                            className={`bg-color-primary-500 w-[50%]  text-white py-1 rounded-lg`}
                             onClick={() => {
-                                if (uid && type) {
-                                    router.push({
-                                        pathname: `/result/${uid}`,
-                                        query: {
-                                            "type": type
-                                        }
-                                    });
-                                }
+                                router.push("/patient/postures");
                                 setIsModal(false);
                             }}>확인
                         </button>
