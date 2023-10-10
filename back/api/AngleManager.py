@@ -117,7 +117,7 @@ class AngleManager():
             elif angle <= 40 :
                 scoreAngle[key]=70
             else:
-                scoreAngle[key]=60
+                scoreAngle[key]=30
 
         return scoreAngle
 

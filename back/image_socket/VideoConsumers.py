@@ -16,8 +16,48 @@ from api.PoseDetector import *
 
 # 환자 모션 웹캠 저장 및 점수 반환 consumer
 class VideoConsumers(AsyncWebsocketConsumer):
-    async def find(self, cap):
-        return cap.read()
+
+    async def save_mp4(self, file_name_patient,file_name_doctor):
+
+        fps = 30  # 원하는 프레임 속도
+        cap = cv2.VideoCapture(file_name_patient)
+        cap.set(cv2.CAP_PROP_FPS, fps)
+        detector = PoseDetector()
+        # 의사 파일 가져오는 코드
+        cap1 = cv2.VideoCapture(file_name_doctor)
+        cap1.set(cv2.CAP_PROP_FPS, fps)
+        detector1 = PoseDetector()  # 의사용
+        angleManager = AngleManager()
+        # mp4확장자 선택을 위함
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # 앞 string 파일 이름
+        width = int(cap.get(3))
+        height = int(cap.get(4))
+        new_file_patient=file_name_patient[:-4]+"1.mp4" #동영상 저장 파일 이름
+        out=cv2.VideoWriter(new_file_patient,fourcc, fps, (width, height)) #동영상 저장 파일 이름
+
+        while True:
+            success, target_image = cap.read()
+            success1,doctor_image=cap1.read()
+
+            if target_image is None or doctor_image is None:
+                break
+
+            target_image = detector.findPose(target_image)
+            lmList, patient = detector.findPosition(target_image)
+
+            doctor_image = detector1.findPose(doctor_image)
+            _, doctor = detector1.findPosition(doctor_image)
+            if not doctor or not patient:
+                continue
+
+            angleManager.adjustStd(patient, doctor)
+            angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
+            detector1.drawPose(target_image, out, doctor, 100)
+            success3=out.write(target_image) #동영상 저장하는 부분
+            print(success3)
+        out.release()
+        return True # True일 때 실행 하도록
 
     async def save_video(self, patient_id, exercise_name, exercise_type, video_data):
         # Base64 디코딩하여 바이너리 데이터로 변환
@@ -86,14 +126,11 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name_patient = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
-        # file_name_patient ="madia/patient/3/jiu3159-팔들어올리기-PAUROZPQME.mp4"
         print(file_name_patient)
         cap = cv2.VideoCapture(file_name_patient)
-        pTime = 0
         detector = PoseDetector()
-
-        frameCount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-
+        fps = 30  # 원하는 프레임 속도
+        cap.set(cv2.CAP_PROP_FPS, fps)
         patientAngle = {"LelbowAngle": 0, "LshoulderAngle": 0, "RelbowAngle": 0, "RshoulderAngle": 0
             , "Lhip": 0, "Rhip": 0, "Lknee": 0, "Rknee": 0}
         scoreAngle = {"LelbowAngle": 0, "LshoulderAngle": 0, "RelbowAngle": 0, "RshoulderAngle": 0
@@ -101,55 +138,25 @@ class VideoConsumers(AsyncWebsocketConsumer):
         angleManager = AngleManager()
 
         doctor_video_list = str(correctpic.picturefilename).split('/')
-        teacherAngle = angleManager.GetAvgAngle("media/" + doctor_video_list[0] + "/" + doctor_video_list[1],
-                                                doctor_video_list[2])  # 의사 파일명
+        file_name_doctor="media/" + doctor_video_list[0] + "/" + doctor_video_list[1]
+        teacherAngle = angleManager.GetAvgAngle(file_name_doctor,doctor_video_list[2])  # 의사 파일명
 
-        # 의사 파일 가져오는 코드
-        file_name_doctor = "media/" + str(correctpic.picturefilename)  # 소켓으로 전달된 환자 파일
-        cap1 = cv2.VideoCapture(file_name_doctor)
-        detector1 = PoseDetector()  # 의사용
         similarity = 0.0
 
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
-        ##저장용
-        w = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        print("환자 ", fps)
-        fps1 = cap1.get(cv2.CAP_PROP_FPS)
-        print("의사 ", fps1)
-
-        # mp4확장자 선택을 위함
-        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-        # 앞 string 파일 이름
-        out=cv2.VideoWriter(file_name_patient,fourcc, fps, (w, h))
 
         while True:
-            success, target_image = await self.find(cap)
-            _, skeleton_image = await self.find(cap1)
+            success, target_image = cap.read()
 
             if target_image is None:
                 break
-
-            if skeleton_image is None:
-                break
-
             target_image = detector.findPose(target_image)
-            skeleton_image = detector1.findPose(skeleton_image)
-
             lmList, patient = detector.findPosition(target_image)
-            _, doctor = detector1.findPosition(skeleton_image)
 
-            if not doctor or not patient:
+            if not patient:
                 continue
-
-            angleManager.adjustStd(patient, doctor)
-            angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
-            target_image = detector1.drawPose(target_image, doctor, 100)
-            if target_image is not None :
-                out.write(target_image) #data저장용
 
             # 사이각 구하기 공식
             angleManager.GetAngle(lmList, patientAngle)
@@ -159,18 +166,18 @@ class VideoConsumers(AsyncWebsocketConsumer):
             angleManager.GetAverageJoint(lmList, poselist)
             similarity = angleManager.GetSimiarityCos(teacherAngle, poselist)
 
-        
         print(scoreAngle)
         print(similarity)
         cap.release()
-        out.release()
-        cap1.release()
         cv2.destroyAllWindows()
+
         score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
         print(score)
         patientpic.score = score
         patientpic.save()
 
+        #동영상 저장
+        await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
         await self.send(text_data=json.dumps({
             'type': 'return value',
             'message': score
