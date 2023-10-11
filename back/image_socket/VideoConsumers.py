@@ -33,7 +33,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # 앞 string 파일 이름
         width = int(cap.get(3))
         height = int(cap.get(4))
-        new_file_patient=file_name_patient[:-4]+"1.mp4" #동영상 저장 파일 이름
+        new_file_patient=file_name_patient[:-4]+"2.mp4" #동영상 저장 파일 이름
         out=cv2.VideoWriter(new_file_patient,fourcc, fps, (width, height)) #동영상 저장 파일 이름
 
         while True:
@@ -57,6 +57,8 @@ class VideoConsumers(AsyncWebsocketConsumer):
             success3=out.write(target_image) #동영상 저장하는 부분
             print(success3)
         out.release()
+        second_patient_name=file_name_patient[:-4]+"1.mp4"
+        os.system(f"ffmpeg -i {new_file_patient} -vcodec libx264 {second_patient_name}")
         return new_file_patient # True일 때 실행 하도록
 
     async def save_video(self, patient_id, exercise_name, exercise_type, video_data):
