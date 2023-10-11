@@ -19,43 +19,42 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
     async def save_mp4(self, file_name_patient,file_name_doctor):
 
-        fps = 30  # 원하는 프레임 속도
         cap = cv2.VideoCapture(file_name_patient)
-        cap.set(cv2.CAP_PROP_FPS, fps)
-        detector = PoseDetector()
         # 의사 파일 가져오는 코드
         cap1 = cv2.VideoCapture(file_name_doctor)
-        cap1.set(cv2.CAP_PROP_FPS, fps)
-        detector1 = PoseDetector()  # 의사용
+
+        detector = PoseDetector() #의사용
+        detector1 = PoseDetector()  # 환사용
         angleManager = AngleManager()
         # mp4확장자 선택을 위함
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         # 앞 string 파일 이름
-        width = int(cap.get(3))
-        height = int(cap.get(4))
+        width = round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
         new_file_patient=file_name_patient[:-4]+"2.mp4" #동영상 저장 파일 이름
         out=cv2.VideoWriter(new_file_patient,fourcc, fps, (width, height)) #동영상 저장 파일 이름
 
         while True:
             success, target_image = cap.read()
-            success1,doctor_image=cap1.read()
+            success1,skeleton_image = cap1.read()
 
-            if target_image is None or doctor_image is None:
+            if target_image is None or skeleton_image is None:
                 break
 
-            target_image = detector.findPose(target_image)
-            lmList, patient = detector.findPosition(target_image)
+            skeleton_image = detector.findPose(skeleton_image)     #의사의 이미지로부터 좌표값을 찾는다
+            target_image=detector1.findPose(target_image)       #환자의 이미지로부터 좌표값을 찾는다
 
-            doctor_image = detector1.findPose(doctor_image)
-            _, doctor = detector1.findPosition(doctor_image)
-            if not doctor or not patient:
-                continue
+            lmList,doctor = detector.findPosition(skeleton_image) #의사
+            lmList2,patient = detector1.findPosition(target_image) #환
 
             angleManager.adjustStd(patient, doctor)
-            angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
-            detector1.drawPose(target_image, out, doctor, 100)
+            angleManager.transPos(patient, doctor)
+
+            target_image=detector1.drawPose(target_image, doctor, 100)
             success3=out.write(target_image) #동영상 저장하는 부분
             print(success3)
+
         out.release()
         second_patient_name=file_name_patient[:-4]+"1.mp4"
         os.system(f"ffmpeg -i {new_file_patient} -vcodec libx264 {second_patient_name}")
