@@ -71,6 +71,8 @@ class ManagePatientList(APIView):
 
             type_dict = {}
             for patientpic in patientpic_list:
+                if patientpic.correctpicid.doctorid != doctor:
+                    continue
                 if type_dict.get(patientpic.correctpicid.exercisetype) is None:
                     type_dict[patientpic.correctpicid.exercisetype] = 1
                 else:
