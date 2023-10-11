@@ -37,6 +37,14 @@ export default function TestItem() {
     }, [router.isReady]);
 
     useEffect(() => {
+        if (isModal) {
+            axiosClient.post('/api/check_course', {type: type}).then((res) => {
+                if (res.data) setIsFinished(res.data.data);
+            });
+        }
+    }, [isModal]);
+
+    useEffect(() => {
         if (type) {
             axiosClient.post('/api/video_list', {type: type}).then(res => {
                 console.log(res.data.data);
@@ -67,9 +75,17 @@ export default function TestItem() {
             }
 
             {
-                isModal && <Message setIsModal={setIsModal}
-                                    title={'수고하셨습니다'}
-                                    content={'재활코스 동영상 저장을 완료하였습니다.'}
+                (isModal && isFinished) && <Message setIsModal={setIsModal}
+                                                    title={'재활코스 등록을 완료하였습니다'}
+                                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
+                                                    uid={user?.uid!}
+                                                    type={type!}/>
+            }
+
+            {
+                (isModal && !isFinished) && <Message setIsModal={setIsModal}
+                                                     title={'로딩 중'}
+                                                     content={'동영상 저장중입니다. 잠시만 기다려주세요'}
                 />
             }
 
