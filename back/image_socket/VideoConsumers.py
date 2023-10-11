@@ -57,7 +57,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
             success3=out.write(target_image) #동영상 저장하는 부분
             print(success3)
         out.release()
-        return True # True일 때 실행 하도록
+        return new_file_patient # True일 때 실행 하도록
 
     async def save_video(self, patient_id, exercise_name, exercise_type, video_data):
         # Base64 디코딩하여 바이너리 데이터로 변환
@@ -92,7 +92,6 @@ class VideoConsumers(AsyncWebsocketConsumer):
                 form.patientid = patient
 
                 form.save()
-                print("파일이 생성되었습니다.")
 
         else:
             with open(temp_path + "/video.mp4", "rb") as file:
@@ -110,19 +109,14 @@ class VideoConsumers(AsyncWebsocketConsumer):
             manage_form.patientid = patient
             manage_form.save()
 
+        patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).first()
+        print("파일이 생성되었습니다." + str(patientpic.picturefilename))
+
         # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
-        # media 폴더에 있는 영상을 인공지능 모델에 연결시켜서 결과값을 리턴해야하는데
-        # 이때 프론트에서 새롭게 연결한 웹소켓으로 결과값을 전송하는 것
+        # media 폴더에 있는 영상을 평가시스템에 넘겨서 점수 계산
         print("work")
 
-        correctpic = Correctpic.objects.filter(exercisetype=exercise_type, exercisename=exercise_name).first()
-        patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
-        # while True:
-        #     patientpic = Patientpic.objects.filter(correctpicid=correctpic).first()
-        #     print(patientpic)
-        #     if patientpic is not None:
-        #         print("탈출합니다.")
-        #         break
+        # correctpic = Correctpic.objects.filter(exercisetype=exercise_type, exercisename=exercise_name).first()
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name_patient = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
@@ -137,7 +131,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
             , "Lhip": 0, "Rhip": 0, "Lknee": 0, "Rknee": 0}
         angleManager = AngleManager()
 
-        doctor_video_list = str(correctpic.picturefilename).split('/')
+        doctor_video_list = str(correctPic.picturefilename).split('/')
         file_name_doctor="media/" + doctor_video_list[0] + "/" + doctor_video_list[1]
         teacherAngle = angleManager.GetAvgAngle(file_name_doctor,doctor_video_list[2])  # 의사 파일명
 
@@ -145,7 +139,6 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         poselist = {11: [0, 0], 12: [0, 0], 13: [0, 0], 14: [0, 0], 15: [0, 0], 16: [0, 0], 23: [0, 0], 24: [0, 0],
                     25: [0, 0], 26: [0, 0], 27: [0, 0], 28: [0, 0]}
-
 
         while True:
             success, target_image = cap.read()
@@ -171,13 +164,20 @@ class VideoConsumers(AsyncWebsocketConsumer):
         cap.release()
         cv2.destroyAllWindows()
 
-        score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
-        print(score)
-        patientpic.score = score
-        patientpic.save()
+        # 스켈레톤이 입혀진 새로운 동영상 저장
+        new_file_patient=await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
 
-        #동영상 저장
-        await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
+        with open(new_file_patient, "rb") as file:
+            file_obj = File(file)
+            patientpic.picturefilename = file_obj
+
+            score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
+            print(score)
+            patientpic.score = score
+            patientpic.save()
+
+        print("스켈레톤이 적용된 파일이 생성되었습니다." + str(patientpic.picturefilename))
+
         await self.send(text_data=json.dumps({
             'type': 'return value',
             'message': score
@@ -213,10 +213,11 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         video_data = video_data[23:]
 
-        # 비디오 저장
+        # 비디오 저장 & 점수계산
         await self.save_video(patient_id, exercise_name, exercise_type, video_data)
 
         # 응답을 보낼 때는 send() 메서드를 사용합니다.
         await self.send(text_data='Video saved successfully.')
 
+        # 소켓 종료
         await self.disconnect(1000)
