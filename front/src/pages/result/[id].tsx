@@ -46,7 +46,7 @@ export default function Result() {
                                 </div>
                             })
                         }
-                        <Link href={`/test`}
+                        <Link href={`/patient/postures`}
                               className="fixed inset-x-0 bottom-0 py-5 text-center cursor-pointer flex justify-center gap-5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
                                  stroke="currentColor" className="w-6 h-6">
