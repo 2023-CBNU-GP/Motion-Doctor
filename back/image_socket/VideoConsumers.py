@@ -59,7 +59,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         out.release()
         second_patient_name=file_name_patient[:-4]+"1.mp4"
         os.system(f"ffmpeg -i {new_file_patient} -vcodec libx264 {second_patient_name}")
-        return new_file_patient # True일 때 실행 하도록
+        return second_patient_name # True일 때 실행 하도록
 
     async def save_video(self, patient_id, exercise_name, exercise_type, video_data):
         # Base64 디코딩하여 바이너리 데이터로 변환
@@ -117,8 +117,6 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
         # media 폴더에 있는 영상을 평가시스템에 넘겨서 점수 계산
         print("work")
-
-        # correctpic = Correctpic.objects.filter(exercisetype=exercise_type, exercisename=exercise_name).first()
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
         file_name_patient = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
