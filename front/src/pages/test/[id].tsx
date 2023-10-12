@@ -3,7 +3,7 @@ import Head from "next/head";
 import WebCam from "@md/components/webcam";
 import Message from "@md/components/modal/message";
 import Timer from "@md/components/modal/timer";
-import { CourseDetail } from "@md/interfaces/course.interface";
+import { CourseDetail, VideoResult } from "@md/interfaces/course.interface";
 import { UserInfo } from "@md/interfaces/user.interface";
 import { useRouter } from "next/dist/client/router";
 import { useEffect, useRef, useState } from "react";
@@ -21,6 +21,8 @@ export default function TestItem() {
     const [time, setTime] = useState<number>(0);
     const [user, setUser] = useState<UserInfo>();
 
+    const [videoResult, setVideoResult] = useState<VideoResult>();
+
     const router = useRouter();
 
     // 첫 렌더링 때 특정 코스에 대한 전체 데이터 불러오는 api
@@ -37,11 +39,6 @@ export default function TestItem() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isModal) {
-            axiosClient.post('/api/check_course', {type: type}).then((res) => {
-                if (res.data) setIsFinished(res.data.data);
-            });
-        }
     }, [isModal]);
 
     useEffect(() => {
@@ -83,17 +80,17 @@ export default function TestItem() {
             }
 
             {
-                (isModal && isFinished) && <Message setIsModal={setIsModal}
-                                                    title={'재활코스 등록을 완료하였습니다'}
-                                                    content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
-                                                    uid={user?.uid!}
-                                                    type={type!}/>
+                (isModal && videoResult) && <Message setIsModal={setIsModal}
+                                                     title={'재활코스 등록을 완료하였습니다'}
+                                                     content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
+                                                     uid={user?.uid!}
+                                                     type={type!}/>
             }
 
             {
-                (isModal && !isFinished) && <Message setIsModal={setIsModal}
-                                                     title={'로딩 중'}
-                                                     content={'동영상 저장중입니다. 잠시만 기다려주세요'}
+                (isModal && videoResult == undefined) && <Message setIsModal={setIsModal}
+                                                                  title={'로딩 중'}
+                                                                  content={'동영상 저장중입니다. 잠시만 기다려주세요'}
                 />
             }
 
@@ -134,8 +131,11 @@ export default function TestItem() {
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
-                        <WebCam typeData={type! as string} name={courseDetail?.trainList[tabIdx] as string}
-                                setTime={setTime}></WebCam>
+                        <WebCam typeData={type! as string}
+                                name={courseDetail?.trainList[tabIdx] as string}
+                                setTime={setTime}
+                                setVideoResult={setVideoResult}
+                        ></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">

@@ -16,3 +16,8 @@ export interface CourseDetail {
     // 코스 내 운동목록에 대한 동영상 파일들
     filePathList: Array<string>,
 }
+
+export interface VideoResult {
+    message: number,
+    type: string,
+}
