@@ -5,15 +5,16 @@ import Layout from "@md/components/layout";
 import { PostureInfo } from "@md/interfaces/posture.interface";
 import axiosClient from "@md/utils/axiosInstance";
 import Link from 'next/link'
+import { UserInfo } from "@md/interfaces/user.interface";
 
 export default function Postures() {
     const [resPostures, setResPostures] = useState<PostureInfo[]>();
     const [isDeleted, setIsDeleted] = useState<boolean>(false);
-    const [uid, setUid] = useState<String>("");
+    const [userInfo, setUserInfo] = useState<UserInfo>();
 
     useEffect(() => {
         axiosClient.get('/api/user').then(response => {
-            setUid(response.data.uid);
+            setUserInfo(response.data);
         })
     }, []);
 
@@ -36,7 +37,9 @@ export default function Postures() {
             <Navigation></Navigation>
 
             <Layout>
-                <div className="mx-12 font-bold text-lg my-4">환자 진료 내역</div>
+                <div className="mx-12 font-bold text-lg my-4"><span
+                    className={'text-color-primary-500'}>{userInfo?.name}</span> 환자의 수강 내역
+                </div>
                 <div className="flex flex-col mx-12 border-x border-t border-gray-50">
                     <div className="flex items-center py-3.5 font-bold border-b-2 border-gray-50">
                         <div className="w-[5%] flex justify-center">번호</div>
@@ -54,7 +57,10 @@ export default function Postures() {
 
                         resPostures && resPostures!.map((data: PostureInfo, idx) => {
                             return (
-                                <Link href={{pathname: `/result/${uid}`, query: {"type": `${data.trainTitle}-${data.idx}`}}}
+                                <Link href={{
+                                    pathname: `/result/${userInfo?.uid}`,
+                                    query: {"type": `${data.trainTitle}-${data.idx}`}
+                                }}
                                       key={idx}
                                       className="flex justify-between hover:bg-color-primary-100 border-b-2 border-gray-50 py-3.5">
                                     <div className="w-[5%] flex justify-center">{idx + 1}</div>

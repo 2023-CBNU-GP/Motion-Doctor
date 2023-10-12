@@ -53,6 +53,14 @@ export default function TestItem() {
         }
     }, [type]);
 
+    useEffect(() => {
+        if (time >= 11) {
+            vidRef.current.play();
+        } else {
+            vidRef.current?.pause();
+        }
+    }, [time]);
+
     const handlePlayVideo = () => {
         if (!isPause) {
             vidRef.current.play();
@@ -138,7 +146,8 @@ export default function TestItem() {
                                onClick={() => {
                                    setIsPause(!isPause);
                                    handlePlayVideo();
-                               }} ref={vidRef}
+                               }}
+                               ref={vidRef}
                         ></video>
                     }
                 </div>
