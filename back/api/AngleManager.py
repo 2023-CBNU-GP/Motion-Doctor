@@ -52,7 +52,7 @@ class AngleManager():
 # 23 - 25 | 25 - 27
 #######
     def adjustStd(self,patient, doctor):
-        thresh=[[0,1],[0,4],[11,12],[23,24],[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31]]
+        thresh=[[0,1],[0,4],[11,12],[23,24],[12,14],[14,16],[11,13],[13,15],[12,24],[11,23],[24,26],[26,28],[23,25],[25,27],[28,32],[28,30],[27,29],[27,31],[15,21],[15,19],[15,17],[16,18],[16,22],[16,20]]
         #thresh의 리스트 idx번에 해당하는 x,y좌표 리스트를 numpy화
         #patient Standard 의 줄인말로, 환자 기준치를 의미한다.
         #patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1]
@@ -71,10 +71,27 @@ class AngleManager():
         return doctor
 
 #의사 Pose 좌표를 평행이동한다.
-    def transPos(self,patient,doctor):
+    def transPos(self,thresX,thresY,doctor):
 
         for idx in range(len(doctor)):
-            thresX,thresY = patient[idx][0] - doctor[idx][0], patient[idx][1] - doctor[idx][1]
+
+            doctor[idx][0]+=thresX
+            doctor[idx][1]+=thresY
+
+        return doctor
+
+    def transPosLeft(self,thresX,thresY,doctor):
+        left=[12,14,16,22,18,20,24,26,28,30,32]
+        for idx in left:
+
+            doctor[idx][0]+=thresX
+            doctor[idx][1]+=thresY
+
+        return doctor
+    def transPosRight(self,thresX,thresY,doctor):
+        left=[11,13,15,21,19,17,23,25,27,31,29]
+        for idx in left:
+
             doctor[idx][0]+=thresX
             doctor[idx][1]+=thresY
 
