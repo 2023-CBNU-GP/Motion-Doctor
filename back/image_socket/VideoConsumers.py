@@ -49,7 +49,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
             lmList2,patient = detector1.findPosition(target_image) #환
 
             if patient == None or doctor == None :
-                return "실패"
+                return None
 
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
             angleManager.transPosLeft(patient[12][0] - doctor[12][0], patient[12][1] - doctor[12][1], doctor)
@@ -171,14 +171,17 @@ class VideoConsumers(AsyncWebsocketConsumer):
         # 스켈레톤이 입혀진 새로운 동영상 저장
         new_file_patient=await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
 
-        with open(new_file_patient, "rb") as file:
-            file_obj = File(file)
-            patientpic.picturefilename = file_obj
+        if new_file_patient is None :
+            score=-1
+        else :
+            with open(new_file_patient, "rb") as file:
+                file_obj = File(file)
+                patientpic.picturefilename = file_obj
 
-            score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
-            print(score)
-            patientpic.score = score
-            patientpic.save()
+                score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
+                print(score)
+                patientpic.score = score
+                patientpic.save()
 
         print("스켈레톤이 적용된 파일이 생성되었습니다." + str(patientpic.picturefilename))
 
