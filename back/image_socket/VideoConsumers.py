@@ -47,13 +47,16 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
             lmList,doctor = detector.findPosition(skeleton_image) #의사
             lmList2,patient = detector1.findPosition(target_image) #환
+
             if patient == None or doctor == None :
-                continue
+                return "실패"
+
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
             angleManager.transPosLeft(patient[12][0] - doctor[12][0], patient[12][1] - doctor[12][1], doctor)
             angleManager.transPosRight(patient[11][0] - doctor[11][0], patient[11][1] - doctor[11][1], doctor)
             angleManager.adjustStd(patient, doctor)
-            target_image=detector1.drawPose(target_image, doctor, 100)
+            target_image=detector1.drawPose(target_image, doctor, [0,255])
+            target_image=detector1.drawPose(target_image, patient, [255,255])
             success3=out.write(target_image) #동영상 저장하는 부분
             print(success3)
 
