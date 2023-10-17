@@ -58,7 +58,16 @@ export default function Result() {
                     </div>
                 </div>
                 <div className="w-full bg-gray-50 h-full">
-                    <video controls style={{width: '100%', height: '91.5%', background: 'black'}}
+                    <div className="flex items-center h-[5%] px-5 gap-3 bg-zinc-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                             stroke="currentColor" className="w-6 h-6 stroke-white">
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                        </svg>
+                        <div className={"flex text-white"}><p className={"text-yellow-500"}>노란색</p>: 환자 포즈</div>
+                        <div className={"flex text-white"}><p className={"text-red-500"}>빨간색</p>: 의사 포즈</div>
+                    </div>
+                    <video controls style={{width: '100%', height: '86.5%', background: 'black'}}
                            src={manageDetailData && process.env.NEXT_PUBLIC_API_KEY + '/media/' + manageDetailData?.videoList[tabIdx] as string}>
                     </video>
                     <div className="flex items-center h-[8.5%] justify-between px-5">
