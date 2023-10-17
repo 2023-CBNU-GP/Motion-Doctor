@@ -5,11 +5,12 @@ import axios from "@md/utils/axiosInstance";
 const URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/socket_server';
 const VIDEO_URL = process.env.NEXT_PUBLIC_SOCKET + '/ws/webcam';
 
-export default function WebCam({typeData, name, setTime, setVideoResult}: {
+export default function WebCam({typeData, name, setTime, setVideoResult, setIsCaptured}: {
     typeData: string,
     name: string,
     setTime: any,
-    setVideoResult: any
+    setVideoResult: any,
+    setIsCaptured: any,
 }) {
     const webcamRef = useRef<any>(null);
     const mediaRecorderRef = useRef<any>();
@@ -62,6 +63,8 @@ export default function WebCam({typeData, name, setTime, setVideoResult}: {
         await sleep(10000);
 
         setCapturing(true);
+        setIsCaptured(true);
+
         mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {mimeType: 'video/webm;'});
 
         mediaRecorderRef.current.addEventListener(

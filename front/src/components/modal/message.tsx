@@ -1,11 +1,12 @@
 import { router } from "next/client";
 
-export default function Message({title, content, uid, type, setIsModal}: {
+export default function Message({title, content, uid, type, setIsModal, setVideoResult}: {
     title: string,
     content: string,
     uid?: string,
     type?: string,
-    setIsModal: any
+    setIsModal: any,
+    setVideoResult?: any,
 }) {
     return (
         <div className={`z-50 absolute h-screen w-screen backdrop-brightness-50 backdrop-blur`}>
@@ -41,7 +42,14 @@ export default function Message({title, content, uid, type, setIsModal}: {
                                         setIsModal(false);
                                     }}>확인</button>
                         }
-
+                        {
+                            (title === "에러") &&
+                            <button className={`bg-color-danger-500 w-[50%]  text-white py-1 rounded-lg`}
+                                    onClick={() => {
+                                        setIsModal(false);
+                                        setVideoResult(undefined);
+                                    }}>확인</button>
+                        }
                     </div>
                 </div>
             </div>

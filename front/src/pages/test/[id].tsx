@@ -13,7 +13,6 @@ export default function TestItem() {
     const [type, setType] = useState<string>();
     const [courseDetail, setCourseDetail] = useState<CourseDetail>();
     const [isModal, setIsModal] = useState<boolean>(false);
-    const [isFinished, setIsFinished] = useState<boolean>(false);
 
     const vidRef = useRef<any>(null);
     const [isPause, setIsPause] = useState(false);
@@ -22,6 +21,7 @@ export default function TestItem() {
     const [user, setUser] = useState<UserInfo>();
 
     const [videoResult, setVideoResult] = useState<VideoResult>();
+    const [isCaptured, setIsCaptured] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -80,17 +80,25 @@ export default function TestItem() {
             }
 
             {
-                (isModal && videoResult) && <Message setIsModal={setIsModal}
-                                                     title={'재활코스 등록을 완료하였습니다'}
-                                                     content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
-                                                     uid={user?.uid!}
-                                                     type={type!}/>
+                (isModal && videoResult?.message != -1 && videoResult != undefined) && <Message setIsModal={setIsModal}
+                                                                                                title={'재활코스 등록을 완료하였습니다'}
+                                                                                                content={'수고하셨습니다. 재활코스 등록을 완료하였습니다. 담당의사의 피드백을 기다려주세요.'}
+                                                                                                uid={user?.uid!}
+                                                                                                type={type!}/>
             }
 
             {
-                (isModal && videoResult == undefined) && <Message setIsModal={setIsModal}
-                                                                  title={'로딩 중'}
-                                                                  content={'동영상 저장중입니다. 잠시만 기다려주세요'}
+                (isModal && videoResult?.message == -1) && <Message setIsModal={setIsModal}
+                                                                    setVideoResult={setVideoResult}
+                                                                    title={'에러'}
+                                                                    content={'자세를 인식할 수 없습니다. 주변을 깔끔하게 하고 다시 촬영해주세요.'}
+                />
+            }
+
+            {
+                (isModal && videoResult == undefined && isCaptured) && <Message setIsModal={setIsModal}
+                                                                                title={'로딩 중'}
+                                                                                content={'동영상 저장중입니다. 잠시만 기다려주세요'}
                 />
             }
 
@@ -99,7 +107,7 @@ export default function TestItem() {
             <div className="flex h-full">
                 <div className="h-full w-[20%] flex flex-col">
                     <div
-                        className="flex h-full flex-col overflow-hidden drop-shadow-sm overflow-y-scroll divide-y divide-stone-200 divide-solid">
+                        className="flex h-full flex-col drop-shadow-sm overflow-y-scroll divide-y divide-stone-200 divide-solid">
                         <div className="py-10 px-6 gap-0.5 flex flex-col">
                             <div className="flex gap-2 text-sm">
                                 <div><label
@@ -125,9 +133,10 @@ export default function TestItem() {
                         }
                     </div>
 
-                    <div className="fixed w-[20%] inset-x-0 bottom-0 py-5 px-3 text-center cursor-pointer"
-                         onClick={() => setIsModal(true)}>자세등록하기
-                    </div>
+                    <button disabled={!isCaptured}
+                            className={`disabled:cursor-not-allowed fixed w-[20%] inset-x-0 bottom-0 py-5 px-3 text-center cursor-pointer`}
+                            onClick={() => setIsModal(true)}>자세등록하기
+                    </button>
                 </div>
                 <div className="h-full w-[40%] relative">
                     <div className='w-full h-full z-0'>
@@ -135,14 +144,18 @@ export default function TestItem() {
                                 name={courseDetail?.trainList[tabIdx] as string}
                                 setTime={setTime}
                                 setVideoResult={setVideoResult}
+                                setIsCaptured={setIsCaptured}
                         ></WebCam>
                     </div>
                 </div>
                 <div className="h-full w-[40%]">
+                    <div className={"flex h-[5%] bg-black text-white items-center px-3 justify-center font-bold"}>
+                        아래의 영상을 보고 따라하세요
+                    </div>
                     {courseDetail &&
                         <video controls
                                src={process.env.NEXT_PUBLIC_API_KEY + '/media/' + courseDetail.filePathList[tabIdx]}
-                               style={{width: "100%", height: "93%", background: 'black', cursor: 'pointer'}}
+                               style={{width: "100%", height: "88%", background: 'black', cursor: 'pointer'}}
                                onClick={() => {
                                    setIsPause(!isPause);
                                    handlePlayVideo();
