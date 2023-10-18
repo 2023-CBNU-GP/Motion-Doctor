@@ -48,8 +48,9 @@ class VideoConsumers(AsyncWebsocketConsumer):
             lmList,doctor = detector.findPosition(skeleton_image) #의사
             lmList2,patient = detector1.findPosition(target_image) #환
 
-            if patient == None or doctor == None :
-                return None
+            print(len(patient))
+            if len(patient) == 0 or len(doctor) == 0 or len(patient)<33 :
+                return False,None
 
             angleManager.transPos(patient[0][0] - doctor[0][0], patient[0][1] - doctor[0][1], doctor)
             angleManager.transPosLeft(patient[12][0] - doctor[12][0], patient[12][1] - doctor[12][1], doctor)
@@ -63,7 +64,7 @@ class VideoConsumers(AsyncWebsocketConsumer):
         out.release()
         second_patient_name=file_name_patient[:-4]+"1.mp4"
         os.system(f"ffmpeg -i {new_file_patient} -vcodec libx264 {second_patient_name}")
-        return second_patient_name # True일 때 실행 하도록
+        return True,second_patient_name # True일 때 실행 하도록
 
     async def save_video(self, patient_id, exercise_name, exercise_type, video_data):
         # Base64 디코딩하여 바이너리 데이터로 변환
@@ -169,12 +170,10 @@ class VideoConsumers(AsyncWebsocketConsumer):
         cv2.destroyAllWindows()
 
         # 스켈레톤이 입혀진 새로운 동영상 저장
-        new_file_patient=await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
+        isSuccess,new_file_patient=await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
 
-        if new_file_patient is None :
-            score=-1
-        else :
-            with open(new_file_patient, "rb") as file:
+        if isSuccess :
+           with open(new_file_patient, "rb") as file:
                 file_obj = File(file)
                 patientpic.picturefilename = file_obj
 
@@ -182,6 +181,12 @@ class VideoConsumers(AsyncWebsocketConsumer):
                 print(score)
                 patientpic.score = score
                 patientpic.save()
+        else :
+            score=0
+            patientpic.picturefilename=file_name_patient
+            patientpic.score = score
+            patientpic.save()
+
 
         print("스켈레톤이 적용된 파일이 생성되었습니다." + str(patientpic.picturefilename))
 
