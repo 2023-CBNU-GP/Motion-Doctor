@@ -82,29 +82,25 @@ class VideoConsumers(AsyncWebsocketConsumer):
         subprocess.run(f"ffmpeg -i {video_webm} {video2_mp4}", shell=True)
         print("파일이 변환되었습니다.")
 
-        score = 0
+        score = -1
         correctPic = Correctpic.objects.filter(exercisename=exercise_name, exercisetype=exercise_type).first()
         patient = Patient.objects.filter(id=patient_id).first()
 
-        patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).first()
-        if patientpic is None:
-            # 새로운 Patientpic 객체 생성 및 저장 (여기서 webm 파일을 mp4로 변환해야함)
-            with open(temp_path + "/video.mp4", "rb") as file:
-                form = Patientpic()
+        existing_patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).first()
+        flag = False
+        if existing_patientpic is not None:
+            flag = True
 
-                file_obj = File(file)
-                form.picturefilename = file_obj
-                form.score = score
-                form.correctpicid = correctPic
-                form.patientid = patient
+        with open(temp_path + "/video.mp4", "rb") as file:
+            form = Patientpic()
 
-                form.save()
+            file_obj = File(file)
+            form.picturefilename = file_obj
+            form.score = score
+            form.correctpicid = correctPic
+            form.patientid = patient
 
-        else:
-            with open(temp_path + "/video.mp4", "rb") as file:
-                file_obj = File(file)
-                patientpic.picturefilename = file_obj
-                patientpic.save()
+            form.save()
 
         os.remove('/tmp/video.webm')
         os.remove('/tmp/video.mp4')
@@ -116,15 +112,15 @@ class VideoConsumers(AsyncWebsocketConsumer):
             manage_form.patientid = patient
             manage_form.save()
 
-        patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).first()
-        print("파일이 생성되었습니다." + str(patientpic.picturefilename))
+        new_patientpic = Patientpic.objects.filter(correctpicid=correctPic, patientid=patient).last()
+        print("파일이 생성되었습니다." + str(new_patientpic.picturefilename))
 
         # 환자 모션 영상을 프론트에서 보내면 이것이 media 폴더에 저장됨.
         # media 폴더에 있는 영상을 평가시스템에 넘겨서 점수 계산
         print("work")
 
         # 여기에 파이썬 모델로 영상을 전송하여 결과 score를 저장
-        file_name_patient = "media/" + str(patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
+        file_name_patient = "media/" + str(new_patientpic.picturefilename)  # 소켓으로 전달된 환자 파일
         print(file_name_patient)
         cap = cv2.VideoCapture(file_name_patient)
         detector = PoseDetector()
@@ -151,9 +147,9 @@ class VideoConsumers(AsyncWebsocketConsumer):
             if target_image is None:
                 break
             target_image = detector.findPose(target_image)
-            lmList, patient = detector.findPosition(target_image)
+            lmList, patient_img = detector.findPosition(target_image)
 
-            if not patient:
+            if not patient_img:
                 continue
 
             # 사이각 구하기 공식
@@ -171,24 +167,26 @@ class VideoConsumers(AsyncWebsocketConsumer):
 
         # 스켈레톤이 입혀진 새로운 동영상 저장
         isSuccess,new_file_patient=await self.save_mp4(file_name_patient,file_name_doctor+"/"+doctor_video_list[2])
+        print(isSuccess)
 
-        if isSuccess :
-           with open(new_file_patient, "rb") as file:
-                file_obj = File(file)
-                patientpic.picturefilename = file_obj
+        if isSuccess:
+            with open(new_file_patient, "rb") as file:
+                file_obj2 = File(file)
+                new_patientpic.picturefilename = file_obj2
 
                 score = round((sum(scoreAngle.values()) / 8 + similarity * 100) / 2, 0)
                 print(score)
-                patientpic.score = score
-                patientpic.save()
-        else :
-            score=0
-            patientpic.picturefilename=file_name_patient
-            patientpic.score = score
-            patientpic.save()
+                new_patientpic.score = score
+                new_patientpic.save()
 
+            print("스켈레톤이 적용된 파일이 생성되었습니다." + str(new_patientpic.picturefilename))
 
-        print("스켈레톤이 적용된 파일이 생성되었습니다." + str(patientpic.picturefilename))
+            if flag:
+                print("기존 영상이 제거되었습니다." + str(existing_patientpic.picturefilename))
+                existing_patientpic.delete()
+
+        else:
+            new_patientpic.delete()
 
         await self.send(text_data=json.dumps({
             'type': 'return value',
